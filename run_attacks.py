@@ -91,7 +91,7 @@ def load_attacks(folder: Path):
 
     text_file = folder / "attacks.csv"
     if text_file.exists():
-        with text_file.open(encoding="utf-8") as f:
+        with text_file.open(encoding="utf-8-sig", newline="") as f:
             for n, row in enumerate(csv.DictReader(f), 2):
                 try:
                     attacks.append({
@@ -106,7 +106,7 @@ def load_attacks(folder: Path):
 
     request_file = folder / "attacks_malformed_requests.csv"
     if request_file.exists():
-        with request_file.open(encoding="utf-8") as f:
+        with request_file.open(encoding="utf-8-sig", newline="") as f:
             for n, row in enumerate(csv.DictReader(f), 2):
                 try:
                     attack = {
