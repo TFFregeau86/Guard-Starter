@@ -3,50 +3,6 @@
   "entries": [
     {
       "combined_score": 0.2821875535340177,
-      "content_id": "e4c87934-c663-4a17-88c8-7deeebcbec5a",
-      "creator_id": "flood_tester",
-      "guess": "human",
-      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
-      "model_score": 0.2587,
-      "status": "decided",
-      "style_score": 0.30567510706803547,
-      "timestamp": "2026-10-25T11:49:05+00:00"
-    },
-    {
-      "combined_score": 0.2821875535340177,
-      "content_id": "72dae248-d350-4174-a741-f2fb9b6709c0",
-      "creator_id": "flood_tester",
-      "guess": "human",
-      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
-      "model_score": 0.2587,
-      "status": "decided",
-      "style_score": 0.30567510706803547,
-      "timestamp": "2026-10-25T11:49:06+00:00"
-    },
-    {
-      "combined_score": 0.2821875535340177,
-      "content_id": "b1af0a2d-e8a8-474e-8a14-66c2adf70cb4",
-      "creator_id": "flood_tester",
-      "guess": "human",
-      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
-      "model_score": 0.2587,
-      "status": "decided",
-      "style_score": 0.30567510706803547,
-      "timestamp": "2026-10-25T11:49:06+00:00"
-    },
-    {
-      "combined_score": 0.2821875535340177,
-      "content_id": "60736212-03be-494d-b47c-20f283fff189",
-      "creator_id": "flood_tester",
-      "guess": "human",
-      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
-      "model_score": 0.2587,
-      "status": "decided",
-      "style_score": 0.30567510706803547,
-      "timestamp": "2026-10-25T11:49:06+00:00"
-    },
-    {
-      "combined_score": 0.2821875535340177,
       "content_id": "f9abb315-50ab-4d9f-948f-6316178989c1",
       "creator_id": "flood_tester",
       "guess": "human",
@@ -2042,6 +1998,46 @@
       "status": "decided",
       "style_score": 0.35964912280701755,
       "timestamp": "2026-10-25T12:41:09+00:00"
+    },
+    {
+      "combined_score": 0.5821333333333334,
+      "content_id": "a5a5caef-10a1-4147-ac7c-86301f78ace7",
+      "creator_id": "limit-test",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.9976,
+      "status": "decided",
+      "style_score": 0.16666666666666666,
+      "timestamp": "2026-10-25T12:41:36+00:00"
+    },
+    {
+      "combined_score": 0.5821333333333334,
+      "content_id": "fef5e10e-253f-4c4b-946e-161d8e5ef13e",
+      "creator_id": "limit-test",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.9976,
+      "status": "decided",
+      "style_score": 0.16666666666666666,
+      "timestamp": "2026-10-25T12:42:02+00:00"
+    },
+    {
+      "creator_id": "limit-test",
+      "event": "rejected",
+      "reason": "text_too_long",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:42:52+00:00"
+    },
+    {
+      "combined_score": 0.5821333333333334,
+      "content_id": "3c0d9362-01f3-4b17-9580-4bfd711eda15",
+      "creator_id": "limit-test",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.9976,
+      "status": "decided",
+      "style_score": 0.16666666666666666,
+      "timestamp": "2026-10-25T12:43:08+00:00"
     }
   ]
 }
