@@ -169,14 +169,14 @@ def submit():
     creator_id = creator_id.strip()
 
     # Reject excessively large input before running the detector.
-    if len(text) > 100_000:
+    if len(text) > 10_000:
         audit.log_rejection(
             creator_id=creator_id,
             reason="text_too_long",
         )
         return jsonify({
             "error": "text_too_long",
-            "message": "Text must not exceed 100000 characters.",
+            "message": "Text must not exceed 10000 characters.",
         }), 413
 
     # Run both independent signals.
