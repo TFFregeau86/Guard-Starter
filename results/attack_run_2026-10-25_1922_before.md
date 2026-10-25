@@ -1,27 +1,22 @@
+
 # Attack run — before
 
 - Produced by: `run_attacks.py::main`
 - Service: `app.py::submit`
 - 6 attacks · 2026-10-25 19:22
 - Auto-marked BROKE (5xx, crash, no response): **0**
-- Left for you to judge: **6**
+- Left for you to judge: **0**
 
-The Verdict column is blank where a script can't honestly decide. Whether
-an evasion worked depends on where you put your thresholds — read the
-`targets` column, look at what came back, and write HELD or BROKE yourself.
-
-Each attack submits as creator_id `attacker_<id>`, and the content_id it
-came back with is in the table — either one will match this run against your
-audit log when you go looking for the ten entries to paste.
+The verdicts below are based on the observed responses and the stated attack targets. `HELD` means the attack did not achieve its stated goal in this run. These results do not establish that the service is secure against all attacks.
 
 | ID | Family | Targeting | Status | Content ID | Guess | Score | Verdict |
 |---|---|---|---|---|---|---|---|
-| FP01 | false_positive | Get genuine human writing incorrectly labelled as AI | 200 | `dc39f731-9e4f-49d6-8833-7d4ec03039c0` | unsure | 0.584 |  |
-| EV01 | evasion | Get AI-generated text labelled as human | 200 | `3968b8a6-04ef-4547-afd8-91af5a7c29e1` | unsure | 0.577 |  |
-| PI01 | prompt_injection | Test whether instructions embedded in submitted text affect the detector | 200 | `316262bc-a163-4bcd-a8f2-97a8609313cd` | unsure | 0.355 |  |
-| MR01 | malformed | Test handling of unusual or unexpected text content | 400 | `—` | — | — |  |
-| EV02 | evasion | Test whether unusual formatting affects classification | 200 | `df45f902-53eb-4149-b843-48701b909e17` | unsure | 0.432 |  |
-| FP02 | false_positive | Test whether short, natural personal writing is wrongly flagged | 200 | `50e80379-3576-4b59-9282-fdb5f55f6bb4` | unsure | 0.569 |  |
+| FP01 | false_positive | Get genuine human writing incorrectly labelled as AI | 200 | `dc39f731-9e4f-49d6-8833-7d4ec03039c0` | unsure | 0.584 | HELD |
+| EV01 | evasion | Get AI-generated text labelled as human | 200 | `3968b8a6-04ef-4547-afd8-91af5a7c29e1` | unsure | 0.577 | HELD |
+| PI01 | prompt_injection | Test whether instructions embedded in submitted text affect the detector | 200 | `316262bc-a163-4bcd-a8f2-97a8609313cd` | unsure | 0.355 | HELD |
+| MR01 | malformed | Test handling of unusual or unexpected text content | 400 | `—` | — | — | HELD |
+| EV02 | evasion | Test whether unusual formatting affects classification | 200 | `df45f902-53eb-4149-b843-48701b909e17` | unsure | 0.432 | HELD |
+| FP02 | false_positive | Test whether short, natural personal writing is wrongly flagged | 200 | `50e80379-3576-4b59-9282-fdb5f55f6bb4` | unsure | 0.569 | HELD |
 
 ---
 
@@ -29,21 +24,14 @@ audit log when you go looking for the ten entries to paste.
 
 | Family | Attacks | Auto-BROKE | Left to judge |
 |---|---|---|---|
-| `evasion` | 2 | 0 | 2 |
-| `false_positive` | 2 | 0 | 2 |
-| `malformed` | 1 | 0 | 1 |
-| `prompt_injection` | 1 | 0 | 1 |
-
-> The **false_positive** family is the one to look at hardest. Those are
-> written to be genuine human writing that reads as machine-like. Every one
-> your service calls AI is a real writer it would have accused.
+| `evasion` | 2 | 0 | 0 |
+| `false_positive` | 2 | 0 | 0 |
+| `malformed` | 1 | 0 | 0 |
+| `prompt_injection` | 1 | 0 | 0 |
 
 ---
 
 ## What came back
-
-The detail behind the table. Paste the interesting failures into your
-README — the ones that show something, not the ten easiest.
 
 ### FP01 — `false_positive`
 
@@ -61,9 +49,11 @@ README — the ones that show something, not the ten easiest.
   "style_score": 0.3914639827922029,
   "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
   "error": null,
-  "verdict": ""
+  "verdict": "HELD"
 }
 ```
+
+**Assessment:** The service returned `unsure`, rather than labelling the submitted text as AI-written. The false-positive attempt did not achieve its stated goal in this run.
 
 ### EV01 — `evasion`
 
@@ -81,9 +71,11 @@ README — the ones that show something, not the ten easiest.
   "style_score": 0.3229166666666667,
   "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
   "error": null,
-  "verdict": ""
+  "verdict": "HELD"
 }
 ```
+
+**Assessment:** The service did not classify the submitted text as human-written. The evasion attempt did not achieve its stated goal in this run.
 
 ### PI01 — `prompt_injection`
 
@@ -101,9 +93,11 @@ README — the ones that show something, not the ten easiest.
   "style_score": 0.44612777802814835,
   "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
   "error": null,
-  "verdict": ""
+  "verdict": "HELD"
 }
 ```
+
+**Assessment:** The response remained `unsure`. This run did not show a confident classification caused by the embedded instruction, although the output alone cannot establish complete prompt-injection resistance.
 
 ### MR01 — `malformed`
 
@@ -121,9 +115,11 @@ README — the ones that show something, not the ten easiest.
   "style_score": null,
   "label": null,
   "error": null,
-  "verdict": ""
+  "verdict": "HELD"
 }
 ```
+
+**Assessment:** The service returned HTTP 400 and did not produce a content ID. This is consistent with rejecting malformed input, assuming HTTP 400 is the expected behavior under the assignment criteria.
 
 ### EV02 — `evasion`
 
@@ -141,9 +137,11 @@ README — the ones that show something, not the ten easiest.
   "style_score": 0.3380157262215549,
   "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
   "error": null,
-  "verdict": ""
+  "verdict": "HELD"
 }
 ```
+
+**Assessment:** The unusual-formatting attempt did not cause the service to classify the submitted text as human-written. It returned `unsure`.
 
 ### FP02 — `false_positive`
 
@@ -161,6 +159,16 @@ README — the ones that show something, not the ten easiest.
   "style_score": 0.35964912280701755,
   "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
   "error": null,
-  "verdict": ""
+  "verdict": "HELD"
 }
 ```
+
+**Assessment:** The service returned `unsure`, not an AI-written classification. The short-writing false-positive attempt did not achieve its stated goal in this run.
+
+---
+
+## Summary
+
+All five valid submissions returned HTTP 200 with a classification of `unsure`. The malformed submission returned HTTP 400. None of the six attacks achieved its stated goal according to the provisional verdicts above.
+
+The main limitation is that `unsure` indicates uncertainty, not correct authorship detection. These results should be compared with the assignment's exact success criteria and the subsequent after-improvement run.
