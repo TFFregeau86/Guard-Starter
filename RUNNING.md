@@ -1,308 +1,308 @@
-# Running Provenance Guard
+Running Provenance Guard
 
-Everything about how the starter works.
+This guide explains how to set up, run, and test the local Provenance Guard web service.
 
-This is a **web service**. It runs on your machine and you talk to it with
-`curl` from another terminal. If you've not built a backend before, that's
-assumed — the starter ships one that already answers.
+Requirements
+Python installed on your computer.
+Git Bash or another terminal.
+The project repository downloaded locally.
+Dependencies listed in requirements.txt.
 
----
+The project uses a local GPT-2 model. The first model download is approximately 550 MB. No API key is required for the local detector.
 
-## Before your first class
+First-Time Setup
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
+Run these commands from the project directory in Git Bash:
+
+bash
+python -m venv .venv
+source .venv/Scripts/activate
 pip install -r requirements.txt
 python test.py
-```
 
-**You're ready when `python test.py` passes.**
 
-You'll see `[WARN] Detector model — not downloaded yet`:
+If .venv already exists, you do not need to create it again. Activate it and run the environment check:
 
-```bash
-python detector.py
-```
+bash
+source .venv/Scripts/activate
+python test.py
 
-That downloads about 550 MB and scores a sample.
 
-> **No API key for this pair.** Nothing here calls a hosted service. The model
-> that reads your text runs on your own laptop.
+In Windows PowerShell, activate the environment with:
 
----
+powershell
+.\.venv\Scripts\Activate.ps1
 
-## Your first five minutes
 
-Two terminals. In the first:
+The environment is ready when python test.py passes.
 
-```bash
+Verified: The latest recorded environment check passed all nine checks, including Python, the virtual environment, dependencies, PyTorch, Flask, the detector model, and the service.
+
+Start the Service
+
+Use two terminals.
+
+Terminal 1 — Run Flask
+
+From the project directory, activate the virtual environment if necessary, then run:
+
+bash
+source .venv/Scripts/activate
 python app.py
-```
 
-In the second:
 
-```bash
-curl -X POST http://127.0.0.1:5000/ping \
+Leave this terminal open while making requests.
+
+The service normally runs at:
+
+text
+http://127.0.0.1:5000
+
+Terminal 2 — Send Requests
+
+Open another terminal in the project directory. Activate the virtual environment:
+
+bash
+source .venv/Scripts/activate
+
+
+Use this terminal to run the following tests while Flask remains running in Terminal 1.
+
+Test the Service
+1. Test /ping
+bash
+curl.exe -X POST http://127.0.0.1:5000/ping \
   -H "Content-Type: application/json" \
-  -d '{"message": "hello"}'
-```
+  -d "{\"message\":\"hello\"}"
 
-You should get JSON back. That's the whole idea of a web service — something
-sent it data, it sent something back.
 
-> **On Windows, use `curl.exe` and keep it on one line.**
->
-> In PowerShell, `curl` is an alias for a different tool and the command above
-> fails with `Cannot bind parameter 'Headers'` before it ever reaches your
-> service. The `\` line breaks don't work there either. This does:
->
-> ```powershell
-> curl.exe -X POST http://127.0.0.1:5000/ping -H "Content-Type: application/json" -d '{\"message\": \"hello\"}'
-> ```
->
-> Every `curl` command in this file and in the brief works the same way: swap
-> `curl` for `curl.exe` and put it on one line. Git Bash needs no change.
+Expected response:
 
-**Leave `/ping` alone.** It's your control. When something breaks later, check
-`/ping` still answers: if it does, the problem is in your handler; if it
-doesn't, it's the service itself, and that's a help-channel question.
+json
+{
+  "ok": true,
+  "service": "provenance-guard",
+  "you_sent": "hello"
+}
 
-Then try the route you're going to build:
 
-```bash
-curl -X POST http://127.0.0.1:5000/submit \
+Verified: The endpoint returns HTTP 200 and the expected JSON response.
+
+2. Check /health
+bash
+curl.exe http://127.0.0.1:5000/health
+
+
+The response includes the detector model, whether it is loaded, whether rate limiting is enabled, and the number of audit log entries.
+
+The detector may initially report "detector_loaded": false. The model is loaded when the detector is first used, so this alone does not indicate an error.
+
+3. Submit Writing
+bash
+curl.exe -X POST http://127.0.0.1:5000/submit \
   -H "Content-Type: application/json" \
-  -d '{"text": "some writing", "creator_id": "me"}'
-```
+  -d "{\"text\":\"The rain fell softly on the empty street.\",\"creator_id\":\"writer-001\"}"
 
-It returns a `501` saying it isn't built yet. **That's the correct starting
-position.**
 
----
+The working route returns a JSON response containing:
 
-## The routes
+content_id
+creator_id
+guess
+confidence
+label
+model_score
+style_score
+combined_score
+text_length
 
-| Route | State | What it does |
-|---|---|---|
-| `POST /ping` | **works** | The example. Don't edit it |
-| `GET /health` | **works** | Is the service up, is the model loaded |
-| `GET /log` | **works** | The audit log, as JSON |
-| `POST /submit` | **you build it** | Milestones 3, 4, 5 |
-| `POST /appeal` | **you build it** | Milestone 5 |
+The confidence field currently contains the combined score. It is not a calibrated probability that the classification is correct.
 
----
+Verified: The submission route calls both detector.model_signal(text) and stylometry.style_signal(text), combines their scores, assigns a classification, creates a unique content ID, and records the decision.
 
-## Every command
+The configured thresholds are:
 
-| Command | What it does |
-|---|---|
-| `python test.py` | Checks your environment |
-| `python app.py` | Runs the service |
-| `python detector.py` | Downloads the model and scores a sample — **run before class** |
-| `python detector.py "some text"` | Score one piece of text from the terminal |
-| `python stylometry.py "some text"` | Your style measures, on one piece of text |
-| `python run_attacks.py --set <folder>` | The attack set — **unit 8** |
-| `python run_attacks.py --flood 15` | Push past your rate limit and print the status codes — **unit 8** |
-| `python run_eval.py --label before` | Your five criteria, three trials — **unit 8** |
+Human: combined score from 0.00 to 0.35, inclusive.
+Unsure: combined score greater than 0.35 and less than 0.65.
+AI: combined score from 0.65 to 1.00, inclusive.
 
----
+These classifications indicate heuristic writing patterns, not verified authorship.
 
-## Which piece goes with which milestone
+4. Check the Audit Log
+bash
+curl.exe "http://127.0.0.1:5000/log?limit=5"
 
-### Unit 7 — the build
 
-| Milestone | What you're doing | Where |
-|---|---|---|
-| 1 | Trace a submission on paper | Nothing to run |
-| 2 | Write your criteria | `criteria.md` — all five are yours |
-| 3 | The route, one signal, the log | `app.py::submit`, `detector.py`, `audit.py` |
-| 4 | Second signal, combine, score | `stylometry.py`, `scoring.py::combine_signals` |
-| 5 | Labels and the appeal path | `scoring.py::score_to_label`, `app.py::appeal` |
-| 6 | Write it up | `README.md` |
+A successful submission should add an entry containing all nine required decision fields:
 
-### Unit 8 — the test
+timestamp
+content_id
+creator_id
+guess
+model_score
+style_score
+combined_score
+label
+status
 
-| Milestone | What you're doing | Where |
-|---|---|---|
-| 1 | Rate limiting and the full log | `config.py`, the decorator in `app.py` |
-| 2 | Run the attack set | `run_attacks.py` |
-| 3 | Run your own criteria | `scenarios.py`, `run_eval.py` |
-| 4 | Verdicts and diagnoses | `README.md` |
-| 5 | Fix one thing, re-run | `run_attacks.py --label after` |
-| 6 | What's still broken | `README.md` |
+The initial decision status is decided.
 
----
+The audit log also records rejected requests and appeals.
 
-## Building `/submit` in three passes
+To display the configured audit-log path, run:
 
-The ordering is deliberate. It's how you tell a broken route from a broken
-signal.
+bash
+python -c "import config; print(config.AUDIT_LOG)"
 
-**Milestone 3.** Return a hardcoded response. Confirm `curl` gets it back
-**before** you add any logic. Then pull `text` and `creator_id` out. Then call
-one signal. Then log it.
 
-**Milestone 4.** Add the second signal. Combine them. Log both scores.
+The audit writer creates the log directory and file when an entry is written.
 
-**Milestone 5.** Turn the score into a label.
+5. Test an Appeal
 
-> Test each signal from a terminal on its own before wiring it in. If you skip
-> that you'll spend an hour not knowing whether the route or the signal is
-> lying to you.
+First, submit writing using /submit and copy the actual content_id from its response.
 
----
+Then run the following command, replacing the example ID with the ID returned by your submission:
 
-## Turning on rate limiting (unit 8)
+bash
+curl.exe -X POST http://127.0.0.1:5000/appeal \
+  -H "Content-Type: application/json" \
+  -d "{\"content_id\":\"PASTE_ACTUAL_CONTENT_ID_HERE\",\"reasoning\":\"I wrote this text myself and would like the decision reviewed.\"}"
 
-Three steps:
 
-1. In `config.py`, set `RATE_LIMITING_ENABLED = True` — or run with
-   `AI201_RATE_LIMITS=1`.
-2. Choose your numbers there.
-3. In `app.py`, uncomment the `@limiter.limit(...)` line above `submit`.
+Expected response for an existing decision:
 
-Then push past your limit and watch for `429`:
+json
+{
+  "content_id": "YOUR_ACTUAL_CONTENT_ID",
+  "message": "Your appeal has been recorded. This submission is now under review.",
+  "ok": true,
+  "status": "under_review"
+}
 
-```bash
-python run_attacks.py --flood 15
-```
 
-That sends 15 submissions from one `creator_id` and prints the run of status
-codes — `200 200 200 ... 429 429` — which is exactly what your README's **Rate
-Limiting** section asks you to paste. It also writes `results/flood_<date>.md`.
+Replace the placeholder with the actual ID before running the command.
 
-The attack set can't do this for you. Every attack row submits under its own
-`creator_id`, so a full attack run looks like forty-odd different callers and
-never trips a limit however long it is.
+Verified: A valid appeal returned HTTP 200 and recorded an under_review audit entry. An appeal using a nonexistent content ID returned HTTP 404.
 
-No `429` at all? Either your limit is above 15 a minute, or rate limiting is
-still off. `GET /health` reports which.
+Appeals are appended to the audit log. They do not overwrite the original decision or automatically determine whether that decision was correct.
 
-Rejections are logged for you. **An attack that shows up only as an absence is
-one you'll never find** — a thousand requests that got a `429` and left no
-trace look exactly like a quiet afternoon.
+6. Test Input Validation
 
----
+An empty text submission should be rejected:
 
-## Running it somewhere else (unit 9)
+bash
+curl.exe -i -X POST http://127.0.0.1:5000/submit \
+  -H "Content-Type: application/json" \
+  -d "{\"text\":\"\",\"creator_id\":\"writer-001\"}"
 
-Unit 9 asks you to deploy one of your systems. **Read this before you pick
-which one** — for this project the answer is already decided, and it isn't the
-hosted one.
 
-Flask's built-in server says "development server" on startup because that's
-what it is. A real one comes from `gunicorn`, which is in
-`requirements.txt` and unused until now:
+A submission missing creator_id should also be rejected:
 
-```bash
-gunicorn app:app --bind 0.0.0.0:$PORT
-```
+bash
+curl.exe -i -X POST http://127.0.0.1:5000/submit \
+  -H "Content-Type: application/json" \
+  -d "{\"text\":\"A sample sentence.\"}"
 
-Two settings do the work, and both read the environment:
 
-| Variable | Default | What it does |
-|---|---|---|
-| `HOST` | `127.0.0.1` | Loopback — your machine only. A host needs `0.0.0.0`, or nothing outside the box can reach the service and it looks like the app is down |
-| `PORT` | `5000` | Most hosts hand you a port in `PORT` and expect you to bind exactly that one |
-| `AI201_DEBUG` | `1` | Debug mode. Off automatically whenever `HOST` isn't loopback — an interactive debugger on a public address is a stranger's Python prompt inside your process |
+Invalid JSON should be rejected:
 
-Nothing about your local workflow changes. With no variables set you get
-`http://127.0.0.1:5000` and every `curl` above still works.
+bash
+curl.exe -i -X POST http://127.0.0.1:5000/submit \
+  -H "Content-Type: application/json" \
+  -d "not-json"
 
-### This project will not fit a free host
 
-Say it plainly, because the arithmetic is the point:
+Expected behavior:
 
-| What has to be in memory | Roughly |
-|---|---|
-| `torch` | ~200–800 MB depending on the build |
-| the `gpt2` weights | ~550 MB on disk, loaded into RAM to score |
-| Flask, gunicorn, your code | the rest |
-| **A free tier gives you** | **512 MB** |
+Empty or whitespace-only text returns HTTP 400 with invalid_text.
+A missing or invalid creator ID returns HTTP 400 with invalid_creator_id.
+Invalid JSON returns HTTP 400 with invalid_request.
 
-That's over budget before a single request arrives — and a free host has no
-persistent disk, so the 550 MB download starts again after every idle
-spin-down. There is no configuration that fixes this. The model is the size it
-is.
+Verified: These three rejection cases have been tested, and /ping continued to return HTTP 200 afterward.
 
-**So pair 4 extensions take Path B — local, with logs.** That is the expected
-answer for this project, not a fallback and not a failure. Working out that a
-system doesn't fit its host *before* you spend an evening watching it get
-killed is the skill unit 9 is actually testing. Write the arithmetic above in
-your write-up; that's the deliverable.
+The complete ten-case invalid-input evaluation remains to be documented.
 
----
+7. Test the Scoring Module
 
-## Where everything lives
+Run:
 
-| File | What it does |
-|---|---|
-| `config.py` | Every setting: thresholds, weights, rate limits, the model |
-| `app.py` | The service. `/ping` and `/log` work; `/submit` and `/appeal` are yours |
-| `detector.py` | Signal one — the local model. Given to you |
-| `stylometry.py` | Signal two. **Stubs — you build these** |
-| `scoring.py` | Combining and labelling. **Stubs — you build these** |
-| `audit.py` | The audit log writer. Given to you |
-| `run_attacks.py` | Runs the attack set — **unit 8** |
-| `run_eval.py` | Runs your criteria three times — **unit 8** |
-| `scenarios.py` | What your test runs. **You fill this in** |
-| `criteria.md` | Your five criteria. **You write all five** |
-| `logs/audit.jsonl` | Your audit log. **Commit it** |
-| `results/` | Attack runs and run logs. **Commit them** |
+bash
+python scoring.py
 
----
 
-## The two blind spots, up front
+This prints the label ranges, representative classification tests, and the signal-combination test.
 
-Both signals have one, and unit 8's attack set is built out of them. You have
-to name them yourself in Milestone 1 — but knowing they exist now saves you
-from being surprised.
+To test representative scores directly:
 
-**Signal one** measures how *predictable* your text is. Predictability isn't
-authorship. What it really rewards is common words in short, ordinary
-sentences — someone writing in a second language and staying with vocabulary
-they're sure of, a younger writer, anyone writing plainly on purpose. Writing
-like that scores about as machine-like as machine writing does. (Dense, ornate
-prose often goes the other way and reads as human, because rare words are what
-a language model fails to predict.) So the writers this signal is most likely
-to accuse are the ones with the least room to argue back. That is the false
-positive the whole project is about, and it's structural rather than a bug.
+bash
+python -c "import scoring; print(scoring.score_to_label(0.20)); print(scoring.score_to_label(0.50)); print(scoring.score_to_label(0.80))"
 
-**Signal two** cannot read. It has no idea what the text says. Anything that
-changes the shape without changing the substance moves it — typos, broken-up
-sentences, a pasted quotation. That is very cheap to do on purpose.
 
----
+To verify the human threshold boundary:
 
-## When something goes wrong
+bash
+python -c "import scoring; print(scoring.score_to_label(0.35)); print(scoring.score_to_label(0.34))"
 
-| What you see | What it means |
-|---|---|
-| `501 not_implemented` | Correct at the start — that's the TODO in `app.py` |
-| `404` from curl | Is the server running? Is the path exactly what you typed? |
-| `Cannot bind parameter 'Headers'` | You're in PowerShell, where `curl` is a different tool. Use `curl.exe`, on one line |
-| Request body arrives empty | curl needs `-H "Content-Type: application/json"` |
-| `Address already in use` | A server left running from an earlier attempt. Kill it, don't debug it |
-| The first submission takes 10+ seconds | Signal one is loading the model into memory. Later ones take a second or two |
-| *Every* submission takes 10+ seconds | Something is reloading the model each call. `GET /health` shows `detector_loaded` — if it goes back to `false`, look for a reload in your handler |
-| `DetectorUnavailable` | Run `python detector.py` once to download the model |
-| `/appeal` seems to do nothing | Does the `content_id` you sent actually exist in the log? A typo there fails silently |
-| Every request gets through, no `429` ever | The decorator is uncommented but limiting is still off. Set `RATE_LIMITING_ENABLED` in `config.py` |
-| Flask-Limiter warns about storage | Shouldn't happen — `storage_uri` is preconfigured. If you changed it, put it back |
-| All three of your labels never appear | Your ranges have a gap. `scoring.label_ranges()` prints them |
 
-If the route won't respond, go back to `/ping`. If that answers, the problem is
-in your handler.
+Verified: The three representative score tests and both human-threshold boundary tests returned the expected classifications and reader-facing messages.
 
----
+8. Test the Detector Independently
 
-## A note on committing
+To score a sample directly from the terminal:
 
-At least four new commits in unit 7, four more in unit 8.
+bash
+python detector.py "The rain fell softly on the empty street."
 
-`logs/` and `results/` are deliberately **not** in `.gitignore`. Your audit log
-is evidence, and the entries you paste into your README are what unit 8 grades.
 
-**Do not delete and recreate this repository.** You submit the same URL both
-units.
+To test the function used by the Flask route:
+
+bash
+python -c "import detector; print(detector.model_signal('The rain fell softly on the empty street.'))"
+
+
+The first model use can take longer because the model must be loaded. Later requests are generally faster while the model remains loaded.
+
+A warning about loss_type=None may appear from the installed model libraries. A warning alone does not indicate failure; check whether the detector returns a score and whether the request completes successfully.
+
+Current Milestone Status
+Implemented and Tested
+Flask service starts locally.
+/ping, /health, and /log respond.
+/submit validates request data.
+The GPT-2 detector produces a model score.
+stylometry.style_signal(text) produces a style score.
+scoring.combine_signals() combines the signals.
+scoring.score_to_label() assigns classifications and reader-facing messages.
+The configured label ranges and representative boundaries have been tested.
+Successful submissions receive unique content IDs.
+The audit log records decisions with all nine required fields.
+Rejected requests are recorded in the audit log.
+/appeal records valid appeals and marks them under_review.
+Nonexistent content IDs are rejected for appeals.
+The environment check passed all nine checks in the activated virtual environment.
+Remaining Evaluation and Submission Work
+Test ten known human-written samples and record the false-positive count.
+Compare five human-written and five AI-generated samples using their mean combined scores.
+Record a real submission classified as human; actual submissions have already demonstrated unsure and ai.
+Complete and document the ten invalid-input tests.
+Preserve the required evaluation evidence.
+Confirm and complete the Git commits required by the assignment.
+
+These are remaining evaluation and submission tasks, not missing core route implementations.
+
+Troubleshooting
+Symptom	What to check
+Connection refused	Confirm python app.py is running in Terminal 1.
+Connection reset	Check the Flask terminal for a traceback or unexpected process termination.
+/ping works but /submit fails	Inspect the Flask terminal and verify the detector and stylometry functions.
+Detector model is not loaded	Submit a test request or run python detector.py directly.
+/log returns zero entries	Submit a request, then inspect the configured audit path.
+Empty text is rejected	Expected behavior. Submit a non-empty string.
+Missing creator ID is rejected	Expected behavior. Include a non-empty creator_id.
+ModuleNotFoundError	Activate .venv and install dependencies with pip install -r requirements.txt.
+Appeal returns 404	Check that the supplied content ID belongs to a successful submission.
+Important
+
+Keep the same repository for both course units. Commit your work regularly, and preserve the audit logs and evaluation results required by the assignment.
+
+Provenance Guard is an experimental writing-pattern analysis service. Its classifications do not establish authorship, and the unsure result should be treated as a legitimate outcome rather than proof of misconduct.
