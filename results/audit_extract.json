@@ -1,5 +1,5 @@
 {
-  "count": 109,
+  "count": 181,
   "entries": [
     {
       "combined_score": 0.35,
@@ -1136,6 +1136,722 @@
       "status": "decided",
       "style_score": 0.35964912280701755,
       "timestamp": "2026-10-25T12:22:19+00:00"
+    },
+    {
+      "combined_score": 0.5945396620209723,
+      "content_id": "5ec127e5-b3fd-4c99-aae4-32afa6a05014",
+      "creator_id": "eval_my own writi_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7529,
+      "status": "decided",
+      "style_score": 0.43617932404194465,
+      "timestamp": "2026-10-25T12:28:48+00:00"
+    },
+    {
+      "combined_score": 0.585418151087937,
+      "content_id": "7a591223-ceef-4b8c-b8ba-18077eb736ba",
+      "creator_id": "eval_my own writi_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7471,
+      "status": "decided",
+      "style_score": 0.42373630217587416,
+      "timestamp": "2026-10-25T12:28:49+00:00"
+    },
+    {
+      "combined_score": 0.5945396620209723,
+      "content_id": "0bb09242-05c9-4b48-bd0c-dd6d8d77bad5",
+      "creator_id": "eval_my own writi_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7529,
+      "status": "decided",
+      "style_score": 0.43617932404194465,
+      "timestamp": "2026-10-25T12:28:49+00:00"
+    },
+    {
+      "combined_score": 0.585418151087937,
+      "content_id": "8986106a-1e77-4838-8f69-dd1467555f2d",
+      "creator_id": "eval_my own writi_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7471,
+      "status": "decided",
+      "style_score": 0.42373630217587416,
+      "timestamp": "2026-10-25T12:28:49+00:00"
+    },
+    {
+      "combined_score": 0.5945396620209723,
+      "content_id": "76ae0a31-2b0c-4fe2-b766-b17f844786c8",
+      "creator_id": "eval_my own writi_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7529,
+      "status": "decided",
+      "style_score": 0.43617932404194465,
+      "timestamp": "2026-10-25T12:28:49+00:00"
+    },
+    {
+      "combined_score": 0.585418151087937,
+      "content_id": "539cf41f-6aa3-4b69-802c-145ae9fa6523",
+      "creator_id": "eval_my own writi_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7471,
+      "status": "decided",
+      "style_score": 0.42373630217587416,
+      "timestamp": "2026-10-25T12:28:49+00:00"
+    },
+    {
+      "combined_score": 0.5408808641975309,
+      "content_id": "6f9a897c-e604-4dcb-8bc6-8f89b6aae380",
+      "creator_id": "eval_label covera_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.6367,
+      "status": "decided",
+      "style_score": 0.4450617283950617,
+      "timestamp": "2026-10-25T12:28:49+00:00"
+    },
+    {
+      "combined_score": 0.602464027862325,
+      "content_id": "84e00734-c83a-46af-8e86-781bed0ca8c8",
+      "creator_id": "eval_label covera_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7792,
+      "status": "decided",
+      "style_score": 0.4257280557246501,
+      "timestamp": "2026-10-25T12:28:49+00:00"
+    },
+    {
+      "combined_score": 0.5990918525375667,
+      "content_id": "06d1c583-12bf-4ae6-b5e8-21279cb3abe6",
+      "creator_id": "eval_label covera_3",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7747,
+      "status": "decided",
+      "style_score": 0.4234837050751333,
+      "timestamp": "2026-10-25T12:28:49+00:00"
+    },
+    {
+      "combined_score": 0.5408808641975309,
+      "content_id": "2f4bbba0-21a7-4ffb-907a-1d4a047e2b9e",
+      "creator_id": "eval_label covera_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.6367,
+      "status": "decided",
+      "style_score": 0.4450617283950617,
+      "timestamp": "2026-10-25T12:28:49+00:00"
+    },
+    {
+      "combined_score": 0.602464027862325,
+      "content_id": "416cd9f8-a344-42f8-ab06-60510caf3062",
+      "creator_id": "eval_label covera_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7792,
+      "status": "decided",
+      "style_score": 0.4257280557246501,
+      "timestamp": "2026-10-25T12:28:49+00:00"
+    },
+    {
+      "combined_score": 0.5990918525375667,
+      "content_id": "0ba29bbc-c837-474c-a277-5be7fefd965e",
+      "creator_id": "eval_label covera_3",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7747,
+      "status": "decided",
+      "style_score": 0.4234837050751333,
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "combined_score": 0.5408808641975309,
+      "content_id": "ac33e4b7-a16a-4c76-a69d-250453bf688f",
+      "creator_id": "eval_label covera_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.6367,
+      "status": "decided",
+      "style_score": 0.4450617283950617,
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "combined_score": 0.602464027862325,
+      "content_id": "62da5583-3ab8-466e-9652-d121d87eea7f",
+      "creator_id": "eval_label covera_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7792,
+      "status": "decided",
+      "style_score": 0.4257280557246501,
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "combined_score": 0.5990918525375667,
+      "content_id": "4baee977-4d64-4e0a-a746-555692ed96b1",
+      "creator_id": "eval_label covera_3",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7747,
+      "status": "decided",
+      "style_score": 0.4234837050751333,
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_1",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_2",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_3",
+      "event": "rejected",
+      "reason": "text_too_long",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_1",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_2",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_3",
+      "event": "rejected",
+      "reason": "text_too_long",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_1",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_2",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_3",
+      "event": "rejected",
+      "reason": "text_too_long",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "combined_score": 0.23809992486519624,
+      "content_id": "9d13c1db-9d7d-49f3-99ef-8f83488a7157",
+      "creator_id": "eval_prompt injec_1",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.0699,
+      "status": "decided",
+      "style_score": 0.40629984973039246,
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "combined_score": 0.44766810806222257,
+      "content_id": "15712ea4-6a5c-44ce-9c88-c152b2392750",
+      "creator_id": "eval_prompt injec_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.5568,
+      "status": "decided",
+      "style_score": 0.33853621612444523,
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "combined_score": 0.23809992486519624,
+      "content_id": "67fb78c1-2117-4157-bc4e-67b94f0d7c3a",
+      "creator_id": "eval_prompt injec_1",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.0699,
+      "status": "decided",
+      "style_score": 0.40629984973039246,
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "combined_score": 0.44766810806222257,
+      "content_id": "194cec1d-753b-4710-96bd-43f2cdcc5996",
+      "creator_id": "eval_prompt injec_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.5568,
+      "status": "decided",
+      "style_score": 0.33853621612444523,
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "combined_score": 0.23809992486519624,
+      "content_id": "f971a02a-160c-4070-b7be-069565240b59",
+      "creator_id": "eval_prompt injec_1",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.0699,
+      "status": "decided",
+      "style_score": 0.40629984973039246,
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "combined_score": 0.44766810806222257,
+      "content_id": "b346b327-58eb-4b3a-a2e3-068023c1d5c8",
+      "creator_id": "eval_prompt injec_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.5568,
+      "status": "decided",
+      "style_score": 0.33853621612444523,
+      "timestamp": "2026-10-25T12:28:50+00:00"
+    },
+    {
+      "combined_score": 0.4785657405709789,
+      "content_id": "f8cb78b9-27f8-4964-a70c-a91f32b8a9c1",
+      "creator_id": "eval_appeal path_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.663,
+      "status": "decided",
+      "style_score": 0.2941314811419577,
+      "timestamp": "2026-10-25T12:28:51+00:00"
+    },
+    {
+      "combined_score": 0.4785657405709789,
+      "content_id": "c0d358f0-b231-47c9-a77b-7c85931ec8cb",
+      "creator_id": "eval_appeal path_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.663,
+      "status": "decided",
+      "style_score": 0.2941314811419577,
+      "timestamp": "2026-10-25T12:28:51+00:00"
+    },
+    {
+      "combined_score": 0.4785657405709789,
+      "content_id": "db3f91c7-8e50-4eb3-8f04-40d961635a10",
+      "creator_id": "eval_appeal path_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.663,
+      "status": "decided",
+      "style_score": 0.2941314811419577,
+      "timestamp": "2026-10-25T12:28:51+00:00"
+    },
+    {
+      "combined_score": 0.5840819913961014,
+      "content_id": "07557c6d-90bc-4151-bab8-80a7b4ae77d4",
+      "creator_id": "attacker_FP01",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7767,
+      "status": "decided",
+      "style_score": 0.3914639827922029,
+      "timestamp": "2026-10-25T12:35:42+00:00"
+    },
+    {
+      "combined_score": 0.5767083333333334,
+      "content_id": "f5997e54-8921-49c4-beb0-03dd01042fde",
+      "creator_id": "attacker_EV01",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.8305,
+      "status": "decided",
+      "style_score": 0.3229166666666667,
+      "timestamp": "2026-10-25T12:35:42+00:00"
+    },
+    {
+      "combined_score": 0.3546638890140742,
+      "content_id": "833117f0-a4c9-4545-baf9-9843d8d05ebb",
+      "creator_id": "attacker_PI01",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.2632,
+      "status": "decided",
+      "style_score": 0.44612777802814835,
+      "timestamp": "2026-10-25T12:35:42+00:00"
+    },
+    {
+      "creator_id": "attacker_MR01",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:35:42+00:00"
+    },
+    {
+      "combined_score": 0.4324078631107775,
+      "content_id": "e214b455-6f5f-42bd-bdcf-af408879e565",
+      "creator_id": "attacker_EV02",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.5268,
+      "status": "decided",
+      "style_score": 0.3380157262215549,
+      "timestamp": "2026-10-25T12:35:43+00:00"
+    },
+    {
+      "combined_score": 0.5694745614035088,
+      "content_id": "f8c1c19d-6690-4639-87de-cbf37633ce94",
+      "creator_id": "attacker_FP02",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7793,
+      "status": "decided",
+      "style_score": 0.35964912280701755,
+      "timestamp": "2026-10-25T12:35:43+00:00"
+    },
+    {
+      "combined_score": 0.5945396620209723,
+      "content_id": "5c45959c-cb01-4694-baf3-cb81d433c13a",
+      "creator_id": "eval_my own writi_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7529,
+      "status": "decided",
+      "style_score": 0.43617932404194465,
+      "timestamp": "2026-10-25T12:35:47+00:00"
+    },
+    {
+      "combined_score": 0.585418151087937,
+      "content_id": "e46b5dea-86b5-4f66-86ea-d40af9c41cca",
+      "creator_id": "eval_my own writi_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7471,
+      "status": "decided",
+      "style_score": 0.42373630217587416,
+      "timestamp": "2026-10-25T12:35:47+00:00"
+    },
+    {
+      "combined_score": 0.5945396620209723,
+      "content_id": "c00302e4-02bd-4b9a-9aaa-02cd8d1871c6",
+      "creator_id": "eval_my own writi_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7529,
+      "status": "decided",
+      "style_score": 0.43617932404194465,
+      "timestamp": "2026-10-25T12:35:47+00:00"
+    },
+    {
+      "combined_score": 0.585418151087937,
+      "content_id": "84742884-af73-4c86-94ab-482c5ba8bd8e",
+      "creator_id": "eval_my own writi_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7471,
+      "status": "decided",
+      "style_score": 0.42373630217587416,
+      "timestamp": "2026-10-25T12:35:47+00:00"
+    },
+    {
+      "combined_score": 0.5945396620209723,
+      "content_id": "7121c141-51bd-42e1-8d88-66a19a49413c",
+      "creator_id": "eval_my own writi_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7529,
+      "status": "decided",
+      "style_score": 0.43617932404194465,
+      "timestamp": "2026-10-25T12:35:47+00:00"
+    },
+    {
+      "combined_score": 0.585418151087937,
+      "content_id": "bcac467a-8d14-41cd-aea6-46a57dd105fc",
+      "creator_id": "eval_my own writi_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7471,
+      "status": "decided",
+      "style_score": 0.42373630217587416,
+      "timestamp": "2026-10-25T12:35:48+00:00"
+    },
+    {
+      "combined_score": 0.5408808641975309,
+      "content_id": "083c15eb-cecf-4bdf-8c1e-a6fe8bedb139",
+      "creator_id": "eval_label covera_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.6367,
+      "status": "decided",
+      "style_score": 0.4450617283950617,
+      "timestamp": "2026-10-25T12:35:48+00:00"
+    },
+    {
+      "combined_score": 0.602464027862325,
+      "content_id": "88a586c8-4b29-4353-ba32-d7d22966a386",
+      "creator_id": "eval_label covera_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7792,
+      "status": "decided",
+      "style_score": 0.4257280557246501,
+      "timestamp": "2026-10-25T12:35:48+00:00"
+    },
+    {
+      "combined_score": 0.5990918525375667,
+      "content_id": "50d9b362-22da-449f-bd28-8f72005b8846",
+      "creator_id": "eval_label covera_3",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7747,
+      "status": "decided",
+      "style_score": 0.4234837050751333,
+      "timestamp": "2026-10-25T12:35:48+00:00"
+    },
+    {
+      "combined_score": 0.5408808641975309,
+      "content_id": "8a3d673d-2ca2-46ae-ad24-065627622a8e",
+      "creator_id": "eval_label covera_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.6367,
+      "status": "decided",
+      "style_score": 0.4450617283950617,
+      "timestamp": "2026-10-25T12:35:48+00:00"
+    },
+    {
+      "combined_score": 0.602464027862325,
+      "content_id": "39037d0a-c2f1-45d6-b18c-760dccb93c96",
+      "creator_id": "eval_label covera_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7792,
+      "status": "decided",
+      "style_score": 0.4257280557246501,
+      "timestamp": "2026-10-25T12:35:48+00:00"
+    },
+    {
+      "combined_score": 0.5990918525375667,
+      "content_id": "2fca25e5-498f-458a-ba28-e1f1409679d4",
+      "creator_id": "eval_label covera_3",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7747,
+      "status": "decided",
+      "style_score": 0.4234837050751333,
+      "timestamp": "2026-10-25T12:35:48+00:00"
+    },
+    {
+      "combined_score": 0.5408808641975309,
+      "content_id": "e448e436-9bd2-42c4-9c71-86275e99945d",
+      "creator_id": "eval_label covera_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.6367,
+      "status": "decided",
+      "style_score": 0.4450617283950617,
+      "timestamp": "2026-10-25T12:35:48+00:00"
+    },
+    {
+      "combined_score": 0.602464027862325,
+      "content_id": "a5d4b8d2-b5b9-4aca-b83c-6bed155fad81",
+      "creator_id": "eval_label covera_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7792,
+      "status": "decided",
+      "style_score": 0.4257280557246501,
+      "timestamp": "2026-10-25T12:35:48+00:00"
+    },
+    {
+      "combined_score": 0.5990918525375667,
+      "content_id": "634b6200-1e28-4639-995c-dea2596d522e",
+      "creator_id": "eval_label covera_3",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.7747,
+      "status": "decided",
+      "style_score": 0.4234837050751333,
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_1",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_2",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_3",
+      "event": "rejected",
+      "reason": "text_too_long",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_1",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_2",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_3",
+      "event": "rejected",
+      "reason": "text_too_long",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_1",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_2",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "creator_id": "eval_bad input_3",
+      "event": "rejected",
+      "reason": "text_too_long",
+      "status": "rejected",
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "combined_score": 0.23809992486519624,
+      "content_id": "de2f8f39-762c-4061-9738-f68019efb2da",
+      "creator_id": "eval_prompt injec_1",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.0699,
+      "status": "decided",
+      "style_score": 0.40629984973039246,
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "combined_score": 0.44766810806222257,
+      "content_id": "76020f63-1322-4ed8-9c2c-38808e8bafb0",
+      "creator_id": "eval_prompt injec_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.5568,
+      "status": "decided",
+      "style_score": 0.33853621612444523,
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "combined_score": 0.23809992486519624,
+      "content_id": "47b88034-bead-4b57-a4cd-3e2f9208929c",
+      "creator_id": "eval_prompt injec_1",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.0699,
+      "status": "decided",
+      "style_score": 0.40629984973039246,
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "combined_score": 0.44766810806222257,
+      "content_id": "b84b5d48-4bbb-4ec7-b51c-628d9dcb79d5",
+      "creator_id": "eval_prompt injec_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.5568,
+      "status": "decided",
+      "style_score": 0.33853621612444523,
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "combined_score": 0.23809992486519624,
+      "content_id": "66f4b079-953a-40bd-a015-1ffdb4269698",
+      "creator_id": "eval_prompt injec_1",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.0699,
+      "status": "decided",
+      "style_score": 0.40629984973039246,
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "combined_score": 0.44766810806222257,
+      "content_id": "85390c6e-bdbd-46cc-8542-9f8dc0b045bb",
+      "creator_id": "eval_prompt injec_2",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.5568,
+      "status": "decided",
+      "style_score": 0.33853621612444523,
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "combined_score": 0.4785657405709789,
+      "content_id": "3277eaac-47ae-464c-b6af-3e95bb3baa44",
+      "creator_id": "eval_appeal path_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.663,
+      "status": "decided",
+      "style_score": 0.2941314811419577,
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "combined_score": 0.4785657405709789,
+      "content_id": "3c19a7d5-268f-4596-92e9-cef0250fd357",
+      "creator_id": "eval_appeal path_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.663,
+      "status": "decided",
+      "style_score": 0.2941314811419577,
+      "timestamp": "2026-10-25T12:35:49+00:00"
+    },
+    {
+      "combined_score": 0.4785657405709789,
+      "content_id": "6a3be0e4-b303-439d-a13b-15c39d3154ca",
+      "creator_id": "eval_appeal path_1",
+      "guess": "unsure",
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "model_score": 0.663,
+      "status": "decided",
+      "style_score": 0.2941314811419577,
+      "timestamp": "2026-10-25T12:35:50+00:00"
     }
   ]
 }
