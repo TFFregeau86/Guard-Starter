@@ -121,8 +121,10 @@ def health():
 # ── Submit text ───────────────────────────────────────────────────────────────
 
 @app.post("/submit")
-# Enable this decorator in Unit 8 when rate limiting is configured.
-# @limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE}/minute;{config.RATE_LIMIT_PER_DAY}/day")
+@limiter.limit(
+    f"{config.RATE_LIMIT_PER_MINUTE} per minute; "
+    f"{config.RATE_LIMIT_PER_DAY} per day"
+)
 def submit():
     """Validate, score, label, and log a submission."""
     payload = request.get_json(silent=True)

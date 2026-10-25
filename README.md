@@ -406,14 +406,30 @@ http://127.0.0.1:5000
 
 Run requests from a second terminal while Flask is running.
 
-Next Steps
-Complete the ten human-written sample tests and record the number classified as AI.
-Evaluate the score gap between five human-written and five AI-generated samples.
-Verify and record a successful submission classified as human.
-Complete the ten invalid-input tests and confirm /ping still works afterward.
-Review the appeal audit entries and confirm the required review status is recorded.
-Record the evaluation results and any threshold adjustments.
-Make the required Git commits.
-Preserve the audit logs and evaluation results required by the assignment.
+Rate Limiting
 
-Final limitation: Provenance Guard is an experimental writing-pattern analysis service. Its labels indicate heuristic patterns, not verified authorship. The unsure outcome is important because no single model or stylistic measurement can reliably establish who wrote a piece of text.
+Configuration
+
+Per-minute limit: 10 submissions per creator.
+Per-day limit: 200 submissions per creator.
+Storage: In-memory (memory://).
+
+Why these limits?
+
+The limit of 10 submissions per minute allows a writer to submit several pieces without being unnecessarily restricted, while stopping scripts that rapidly submit variations to probe the detector's thresholds. The daily limit of 200 permits normal testing while placing a cap on repeated submissions. These are development limits, not production-tested values.
+
+Flood test
+
+Command: python run_attacks.py --flood 15
+
+Results from October 25, 2026:
+
+text
+200 200 200 200 200 200 200 200 200 200 429 429 429 429 429
+
+
+Result: 10 submissions succeeded, and 5 were rejected with HTTP 429 (Too Many Requests). The rate limiter is working as intended.
+
+Output file: results/flood_2026-10-25_1854.md
+
+Limitation: The limiter uses in-memory storage, so its counters reset when the service restarts. It is suitable for local development but would need shared, persistent storage for a multi-instance production service.
