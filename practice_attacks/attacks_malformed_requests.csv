@@ -1,0 +1,6 @@
+id,family,targets,send_as,content_type,raw_body
+MAL01,malformed,"Empty HTTP body",raw,application/json,
+MAL02,malformed,"Invalid JSON body",raw,application/json,"{not-valid-json"
+MAL03,malformed,"JSON array instead of object",raw,application/json,"[]"
+MAL04,malformed,"JSON null instead of object",raw,application/json,"null"
+MAL05,malformed,"Missing text field",json,application/json,"{""creator_id"":""practice_MAL05""}"
