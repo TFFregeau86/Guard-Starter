@@ -1,24 +1,19 @@
+
 #!/usr/bin/env python3
 """
-Run your five criteria three times each.  <- UNIT 8, MILESTONE 3
+Run evaluation scenarios three times each.
 
-    python app.py                              # in one terminal
-    python run_eval.py --label before          # in another
+Usage:
+    python app.py
+    python run_eval.py --label before
     python run_eval.py --label after
 
-The attack set tests what staff thought to test. This tests what *you* thought
-to test, and the two rarely overlap much. Both count.
-
-Fill in `scenarios.py` first — that's where you say what each criterion needs
-run against it. A criterion about false positives needs your own writing. One
-about label coverage needs inputs across the score range.
-
-!! Three trials, and **your first signal runs a model, so identical input can
-score differently twice.** That's exactly why repeats matter here.
-
-This does the sending and the recording. It does not decide whether a trial
-passed — that depends on the criterion you wrote, so the Verdict column comes
-back blank.
+Tests five acceptance criteria:
+    1. False positives on human writing
+    2. Different scores for different writing
+    3. All three labels are reachable
+    4. Appeals are recorded
+    5. Invalid input is handled safely
 """
 
 import argparse
@@ -29,13 +24,12 @@ from pathlib import Path
 
 import config
 
-# Windows consoles often run a codepage that can't print every character in
-# this file's help text. Without this, `--help` ends in a UnicodeEncodeError
-# traceback instead of the help — which is a miserable first thing to hit.
-for _stream in (sys.stdout, sys.stderr):
+
+# Windows console encoding support
+for stream in (sys.stdout, sys.stderr):
     try:
-        _stream.reconfigure(errors="replace")
-    except (AttributeError, ValueError):  # not a normal text stream
+        stream.reconfigure(errors="replace")
+    except (AttributeError, ValueError):
         pass
 
 
@@ -43,123 +37,275 @@ DEFAULT_URL = f"http://{config.HOST}:{config.PORT}"
 
 
 def bodies_for(scenario):
-    """
-    The request bodies one scenario sends.
+    """Return request bodies for a scenario."""
 
-    A "texts" scenario gets a creator_id made up for it. A "bodies" scenario is
-    sent exactly as written, which is how a bad-input criterion says things a
-    string can't — no `text` field, a null, something enormous.
-    """
     if scenario.get("bodies"):
         return list(scenario["bodies"])
+
     return [
-        {"text": text, "creator_id": f"eval_{scenario['name'][:12]}_{i}"}
+        {
+            "text": text,
+            "creator_id": f"eval_{scenario['name'][:12]}_{i}"
+        }
         for i, text in enumerate(scenario["texts"], 1)
     ]
 
 
 def describe(body):
-    """A short, readable note of what was sent — for the report."""
-    if set(body) == {"text", "creator_id"} and isinstance(body.get("text"), str):
+    """Create a readable description of submitted input."""
+
+    if (
+        set(body) == {"text", "creator_id"}
+        and isinstance(body.get("text"), str)
+    ):
         text = body["text"]
         return text[:70] if text else "(empty text)"
+
     return json.dumps(body)[:120]
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--trials", type=int, default=3)
-    parser.add_argument("--label", default="")
-    parser.add_argument("--url", default=DEFAULT_URL)
-    parser.add_argument("--timeout", type=float, default=90.0)
-    args = parser.parse_args()
+def submit_request(requests, url, body, timeout):
+    """Submit one request and return its response information."""
 
     try:
-        import requests
-    except ImportError:
-        print("The `requests` package isn't installed.\n"
-              "Run: pip install -r requirements.txt", file=sys.stderr)
-        sys.exit(1)
+        response = requests.post(
+            f"{url}/submit",
+            json=body,
+            timeout=timeout
+        )
+
+        try:
+            payload = response.json()
+        except ValueError:
+            payload = {}
+
+        return {
+            "status": response.status_code,
+            "guess": payload.get("guess"),
+            "confidence": payload.get("confidence"),
+            "model_score": payload.get("model_score"),
+            "style_score": payload.get("style_score"),
+            "label": payload.get("label"),
+            "content_id": payload.get("content_id"),
+            "error": payload.get("error"),
+            "sent": describe(body),
+        }
+
+    except Exception as exc:
+        return {
+            "status": None,
+            "error": f"{type(exc).__name__}: {exc}",
+            "sent": describe(body),
+        }
+
+
+def test_appeal(requests, url, timeout):
+    """Test the complete appeal workflow."""
+
+    result = {
+        "test": "appeal workflow"
+    }
+
+    original = submit_request(
+        requests,
+        url,
+        {
+            "text": (
+                "I am requesting a review of this submission "
+                "because I believe the assessment may be inaccurate."
+            ),
+            "creator_id": "eval_appeal"
+        },
+        timeout
+    )
+
+    result["original_submission"] = original
+
+    content_id = original.get("content_id")
+
+    if original.get("status") != 200 or not content_id:
+        result["appeal_status"] = "not attempted"
+        result["passed"] = False
+        return result
 
     try:
-        import scenarios
-    except ImportError:
-        print("No scenarios.py found. Milestone 3 starts by filling it in.",
-              file=sys.stderr)
-        sys.exit(1)
+        response = requests.post(
+            f"{url}/appeal",
+            json={
+                "content_id": content_id,
+                "reasoning": (
+                    "I believe this assessment should be reviewed."
+                )
+            },
+            timeout=timeout
+        )
 
-    problems = scenarios.validate()
-    if problems:
-        print("scenarios.py has problems:\n", file=sys.stderr)
-        for problem in problems:
-            print(f"  - {problem}", file=sys.stderr)
-        sys.exit(1)
+        try:
+            payload = response.json()
+        except ValueError:
+            payload = {}
+
+        result["appeal_response"] = {
+            "status": response.status_code,
+            "body": payload
+        }
+
+        audit_response = requests.get(
+            f"{url}/log",
+            timeout=timeout
+        )
+
+        audit_data = audit_response.json()
+
+        matching_entries = [
+            entry
+            for entry in audit_data.get("entries", [])
+            if entry.get("content_id") == content_id
+        ]
+
+        result["audit_check"] = {
+            "status": audit_response.status_code,
+            "entries_found": len(matching_entries),
+            "statuses": [
+                entry.get("status")
+                for entry in matching_entries
+            ]
+        }
+
+        appeal_recorded = any(
+            entry.get("status") == "under_review"
+            for entry in matching_entries
+        )
+
+        result["passed"] = (
+            response.status_code == 200
+            and payload.get("status") == "under_review"
+            and audit_response.status_code == 200
+            and appeal_recorded
+        )
+
+    except Exception as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
+        result["passed"] = False
+
+    return result
+
+
+def test_invalid_json(requests, url, timeout):
+    """Send syntactically malformed JSON."""
 
     try:
-        requests.get(f"{args.url}/health", timeout=5)
-    except Exception:  # noqa: BLE001
-        print(f"Nothing answering at {args.url}. Start it:  python app.py",
-              file=sys.stderr)
-        sys.exit(1)
+        response = requests.post(
+            f"{url}/submit",
+            data='{"text": "broken", "creator_id": ',
+            headers={
+                "Content-Type": "application/json"
+            },
+            timeout=timeout
+        )
 
-    if args.trials < 3:
-        print(f"!! {args.trials} trial(s). The submission asks for three.\n")
+        try:
+            payload = response.json()
+        except ValueError:
+            payload = {}
 
-    rows = []
-    for scenario in scenarios.SCENARIOS:
-        print(f"\n{scenario['name']}  (criterion {scenario.get('criterion') or '—'})")
+        return {
+            "test": "malformed JSON",
+            "status": response.status_code,
+            "body": payload,
+            "passed": 400 <= response.status_code < 500
+        }
 
-        trials = []
-        for trial in range(1, args.trials + 1):
-            results = []
-            for i, body in enumerate(bodies_for(scenario), 1):
-                preview = describe(body)
-                try:
-                    response = requests.post(f"{args.url}/submit", json=body,
-                                             timeout=args.timeout)
-                    payload = response.json() if response.content else {}
-                    results.append({
-                        "status": response.status_code,
-                        "guess": payload.get("guess"),
-                        "confidence": payload.get("confidence"),
-                        "model_score": payload.get("model_score"),
-                        "style_score": payload.get("style_score"),
-                        "label": payload.get("label"),
-                        "sent": preview,
-                    })
-                except Exception as exc:  # noqa: BLE001
-                    results.append({"status": None, "error": f"{type(exc).__name__}: {exc}",
-                                    "sent": preview})
+    except Exception as exc:
+        return {
+            "test": "malformed JSON",
+            "error": f"{type(exc).__name__}: {exc}",
+            "passed": False
+        }
 
-            trials.append(results)
-            guesses = [r.get("guess") or "—" for r in results]
-            print(f"  trial {trial}: {', '.join(guesses)}")
 
-        rows.append({"scenario": scenario, "trials": trials})
+def test_ping(requests, url, timeout):
+    """Verify the service remains operational."""
 
-    write_report(rows, args)
+    try:
+        response = requests.post(
+            f"{url}/ping",
+            json={"message": "health check"},
+            timeout=timeout
+        )
+
+        return {
+            "test": "ping after invalid input",
+            "status": response.status_code,
+            "passed": response.status_code == 200
+        }
+
+    except Exception as exc:
+        return {
+            "test": "ping after invalid input",
+            "error": f"{type(exc).__name__}: {exc}",
+            "passed": False
+        }
+
+
+def run_scenario(requests, scenario, url, timeout):
+    """Run one scenario."""
+
+    name = scenario["name"]
+
+    if scenario.get("criterion") == 4:
+        return [test_appeal(requests, url, timeout)]
+
+    results = []
+
+    for body in bodies_for(scenario):
+        results.append(
+            submit_request(requests, url, body, timeout)
+        )
+
+    if scenario.get("criterion") == 5:
+        results.append(
+            test_invalid_json(requests, url, timeout)
+        )
+
+        results.append(
+            test_ping(requests, url, timeout)
+        )
+
+    return results
 
 
 def write_report(rows, args):
+    """Write the complete evaluation report."""
+
     config.RESULTS_DIR.mkdir(exist_ok=True)
+
     stamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M")
+
     label = f"_{args.label}" if args.label else ""
-    path = config.RESULTS_DIR / f"run_{stamp}{label}.md"
+
+    path = (
+        config.RESULTS_DIR /
+        f"run_{stamp}{label}.md"
+    )
 
     n = args.trials
-    headers = " | ".join(f"Run {i}" for i in range(1, n + 1))
+
+    headers = " | ".join(
+        f"Run {i}" for i in range(1, n + 1)
+    )
+
     divider = "|".join(["---"] * n)
 
     lines = [
-        f"# Run log{f' — {args.label}' if args.label else ''}",
+        f"# Run log — {args.label}" if args.label else "# Run log",
         "",
         "- Produced by: `run_eval.py::main`",
-        "- Service: `app.py::submit` · scoring: `scoring.py::combine_signals`",
-        f"- {n} trials per criterion · {dt.datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        "- Service: `app.py::submit`",
+        f"- {n} trials per criterion",
+        f"- {dt.datetime.now().strftime('%Y-%m-%d %H:%M')}",
         "",
-        "Fill in Target from `criteria.md`, and Run and Verdict from the output",
-        "underneath. Whether a trial passed depends on the criterion you wrote.",
+        "Fill in Target and Verdict based on criteria.md.",
         "",
         f"| Criterion | Target | {headers} | Verdict |",
         f"|---|---|{divider}|---|",
@@ -167,24 +313,165 @@ def write_report(rows, args):
 
     for row in rows:
         scenario = row["scenario"]
-        number = scenario.get("criterion")
-        name = f"{number}. {scenario['name']}" if number else scenario["name"]
-        lines.append(f"| {name} |  | {' | '.join([' '] * n)} |  |")
 
-    lines += ["", "---", "", "## What actually came back", "",
-              "Real output. Paste the relevant parts into your README — the rubric",
-              "asks for the actual JSON, not a description of it.", ""]
+        lines.append(
+            f"| {scenario.get('criterion')}. "
+            f"{scenario['name']} | | "
+            + " | ".join([" "] * n)
+            + " | |"
+        )
+
+    lines.extend([
+        "",
+        "---",
+        "",
+        "## What actually came back",
+        "",
+        "The following sections contain the actual HTTP responses.",
+        ""
+    ])
 
     for row in rows:
-        scenario = row["scenario"]
-        lines += [f"### {scenario['name']}", ""]
-        for trial_number, results in enumerate(row["trials"], 1):
-            lines += [f"**Trial {trial_number}**", "", "```json",
-                      json.dumps(results, indent=2), "```", ""]
+        lines.extend([
+            f"### {row['scenario']['name']}",
+            ""
+        ])
 
-    path.write_text("\n".join(lines), encoding="utf-8")
+        for trial_number, results in enumerate(
+            row["trials"], 1
+        ):
+            lines.extend([
+                f"**Trial {trial_number}**",
+                "",
+                "```json",
+                json.dumps(results, indent=2),
+                "```",
+                ""
+            ])
+
+    path.write_text(
+        "\n".join(lines),
+        encoding="utf-8"
+    )
+
     print(f"\nWrote {path.relative_to(config.ROOT)}")
-    print("Commit it. It's the evidence the test actually happened.")
+    print("Commit the report when you have reviewed it.")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+
+    parser.add_argument("--trials", type=int, default=3)
+    parser.add_argument("--label", default="")
+    parser.add_argument("--url", default=DEFAULT_URL)
+    parser.add_argument("--timeout", type=float, default=90.0)
+
+    args = parser.parse_args()
+
+    if args.trials < 1:
+        parser.error("--trials must be at least 1")
+
+    try:
+        import requests
+    except ImportError:
+        print(
+            "requests is not installed. Run: "
+            "pip install -r requirements.txt",
+            file=sys.stderr
+        )
+        sys.exit(1)
+
+    try:
+        import scenarios
+    except ImportError:
+        print(
+            "scenarios.py was not found.",
+            file=sys.stderr
+        )
+        sys.exit(1)
+
+    problems = scenarios.validate()
+
+    if problems:
+        print("scenarios.py has problems:")
+
+        for problem in problems:
+            print(f"- {problem}")
+
+        sys.exit(1)
+
+    try:
+        response = requests.get(
+            f"{args.url}/health",
+            timeout=5
+        )
+
+        if response.status_code != 200:
+            raise RuntimeError("Health check failed.")
+
+    except Exception:
+        print(
+            f"Nothing answering at {args.url}. "
+            "Start it using: python app.py",
+            file=sys.stderr
+        )
+        sys.exit(1)
+
+    rows = []
+
+    for scenario in scenarios.SCENARIOS:
+        print(
+            f"\n{scenario['name']} "
+            f"(criterion {scenario.get('criterion')})"
+        )
+
+        trials = []
+
+        for trial in range(1, args.trials + 1):
+            results = run_scenario(
+                requests,
+                scenario,
+                args.url,
+                args.timeout
+            )
+
+            trials.append(results)
+
+            summaries = []
+
+            for result in results:
+                if result.get("test") == "appeal workflow":
+                    summaries.append(
+                        "PASS" if result.get("passed") else "FAIL"
+                    )
+
+                elif result.get("test") in (
+                    "malformed JSON",
+                    "ping after invalid input"
+                ):
+                    summaries.append(
+                        "PASS" if result.get("passed") else "FAIL"
+                    )
+
+                else:
+                    summaries.append(
+                        result.get("guess") or
+                        str(result.get("status"))
+                    )
+
+            print(
+                f"  trial {trial}: {', '.join(summaries)}"
+            )
+
+        rows.append({
+            "scenario": scenario,
+            "trials": trials
+        })
+
+    write_report(rows, args)
 
 
 if __name__ == "__main__":
