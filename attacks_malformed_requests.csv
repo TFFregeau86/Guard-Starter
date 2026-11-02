@@ -1,0 +1,6 @@
+id,family,targets,text
+MAL01,malformed,"Empty text should be rejected",
+MAL02,malformed,"Missing text field",
+MAL03,malformed,"Whitespace-only text","   "
+MAL04,malformed,"Unexpected numeric-looking input","123456789"
+MAL05,malformed,"Very short input","Hi"
