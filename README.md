@@ -513,7 +513,7 @@ This confirms that rejected requests are recorded in the audit log, rather than 
 
 The current implementation uses a local GPT-2 model and in-memory rate-limit storage.
 
-The GPT-2 model runs locally rather than through a paid hosted inference API. Therefore, the model inference component does not incur a per-request hosted API charge in the current configuration.
+The GPT-2 model runs locally rather than through a paid hosted inference API. Therefore, model inference does not incur a per-request hosted API charge in the current configuration.
 
 The service still uses local computing resources, including CPU or GPU time, memory, and storage.
 
@@ -529,15 +529,38 @@ These are development limits, not production-tested values.
 
 The in-memory storage is suitable for local development but would need shared, persistent storage for a multi-instance production service.
 
-**Cost measurement limitation:** A complete financial cost-per-run estimate has not yet been established. It would require measuring local compute and energy costs rather than assuming that local inference is entirely cost-free.
+### Measured Response Time — November 9, 2026
 
-For a workload of 100 users per day, the daily submission count would depend on the average number of submissions per user:
+I measured 10 consecutive submissions to the local `/submit` endpoint using Python's `time.perf_counter()` and the `requests` library.
 
-```text
-Daily submissions = 100 × average submissions per user
-```
+| Measurement | Result |
+|---|---:|
+| Successful submissions | 10/10 |
+| Total elapsed time | 11.0212 seconds |
+| Average including model loading | 1.1021 seconds |
+| First run (cold start) | 10.1557 seconds |
+| Average for runs 2–10 | 0.0962 seconds |
 
-The local inference cost would then need to be estimated from measured compute time, hardware power consumption, and electricity price. No measured dollar amount is claimed here.
+All 10 requests returned HTTP 200.
+
+The first request took considerably longer because the model was loaded during that request. Subsequent requests were much faster.
+
+The measurements include HTTP request overhead, application processing, and model inference. They represent wall-clock response time, not pure CPU time.
+
+### Estimated Workload for 100 Users per Day
+
+Assuming each of the 100 users makes one submission:
+
+- Using the warm average: 100 × 0.0962 = 9.62 seconds.
+- Using the cold-start-inclusive average: 100 × 1.1021 = 110.21 seconds.
+
+These are estimated cumulative response times, not guaranteed processing times for simultaneous users.
+
+### Financial Cost Limitation
+
+A complete financial cost-per-run estimate has not yet been established. Calculating electricity cost would require measuring hardware power consumption and applying the local electricity rate.
+
+No measured dollar amount is claimed. The current implementation has no per-request hosted inference API charge, but local computing still consumes electricity and hardware resources.
 
 ## 6. Run Log and Verdicts
 
