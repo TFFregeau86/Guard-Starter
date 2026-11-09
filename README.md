@@ -4,7 +4,7 @@ A local Flask web service that examines submitted writing using authorship-relat
 
 **Current progress:** The core service, scoring pipeline, audit logging, appeal endpoint, and Unit 8 rate limiting are implemented. The service has been tested with a 72-sample evaluation, a dedicated flood test, and a 56-case attack suite.
 
-A measurable input-handling improvement was implemented and verified on November 9, 2026. All five operational capstone acceptance criteria are documented as passing. Evaluation against known human- and AI-written samples, a measurable improvement to detector-classification performance, and local compute-cost measurement remain outstanding.
+A measurable input-handling improvement was implemented and verified on November 9, 2026. All five operational capstone acceptance criteria are documented as passing. Evaluation against known human- and AI-written samples and a measurable improvement to detector-classification performance remain outstanding. Local CPU and memory measurements have been recorded; direct energy and financial cost measurement remain outstanding.
 
 ---
 
@@ -547,6 +547,27 @@ The first request took considerably longer because the model was loaded during t
 
 The measurements include HTTP request overhead, application processing, and model inference. They represent wall-clock response time, not pure CPU time.
 
+### Additional CPU and Memory Measurement — November 9, 2026
+
+The final corrected local test sent 10 submissions to `/submit` while monitoring the Flask processes discovered in the project directory with `psutil`. Each request used a unique `creator_id` to avoid per-user rate-limit interference. The results are saved in `results/performance_2026-11-09_201615.md` and its matching JSON file.
+
+| Measurement | Result |
+|---|---:|
+| Successful submissions | 10/10 |
+| Total wall-clock time | 0.948 seconds |
+| Average latency, all 10 requests | 0.094 seconds |
+| Median latency | 0.090 seconds |
+| Nearest-rank P95 latency | 0.110 seconds |
+| Aggregate Flask CPU time during test | 12.672 seconds |
+| Peak sampled summed process RSS | 1,910.1 MB |
+| Final summed process RSS | 1,909.9 MB |
+
+CPU time is the sum of user and system CPU seconds for the monitored Flask processes. It can exceed wall-clock time when work runs across multiple CPU cores. Memory is the sampled sum of the processes' resident-set sizes (RSS). Summing RSS can count shared memory pages more than once, so it is not a measure of unique physical memory consumption. The peak is based on periodic samples, not continuous monitoring.
+
+This was a small, local, sequential test. It is not a production load test. The earlier response-time and CPU/memory experiments are separate runs and should not be directly combined with these measurements.
+
+Electrical energy was not directly measured. CPU time and memory are resource measurements, not watt-hours. A direct energy or financial cost estimate would require reliable power-consumption data and the applicable electricity rate.
+
 ### Estimated Workload for 100 Users per Day
 
 Assuming each of the 100 users makes one submission:
@@ -1053,7 +1074,7 @@ The service is functional, but several limitations remain.
 6. **Classification improvement:** A measurable before/after improvement to detector-classification performance has not yet been demonstrated.
 7. **Rate-limit persistence:** The limiter uses in-memory storage and resets when the service restarts.
 8. **Production readiness:** The development Flask server and local model configuration have not been evaluated as a production deployment.
-9. **Cost measurement:** A measured local compute and energy cost per run has not yet been calculated.
+9. **Energy and financial cost:** CPU and memory measurements are recorded, but electrical energy and financial cost per run have not been directly measured.
 
 **Next Step**
 
@@ -1195,8 +1216,8 @@ The final November 9 attack run exercised 56 cases:
 - 0 automatically marked BROKE.
 - 56 cases left for manual judgment.
 
-The five capstone operational acceptance criteria are documented as passing in Section 6. Remaining work includes evaluation against known human and AI samples, a demonstrable before/after improvement to classification performance, and measurement of local compute and energy costs.
+The five capstone operational acceptance criteria are documented as passing in Section 6. Remaining work includes evaluation against known human and AI samples, a demonstrable before/after improvement to classification performance, and direct measurement of electrical energy and financial costs. A local CPU and memory resource measurement is now documented in Section 5.
 
-The operational tests therefore pass, but the classification-performance and cost-measurement requirements remain incomplete.
+The operational tests therefore pass. CPU and memory resource measurements are documented, but classification-performance evaluation and direct energy/financial cost measurement remain incomplete.
 
 The system is an experimental writing-pattern classifier, not a reliable authorship verification system. Its results should be interpreted cautiously and should not be used as definitive evidence of who wrote a piece of text.

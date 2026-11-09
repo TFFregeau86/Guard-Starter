@@ -1,0 +1,101 @@
+{
+  "timestamp": "2026-11-09_201449",
+  "server_pids": [
+    7356,
+    17316
+  ],
+  "detector_model": "gpt2",
+  "requested_submissions": 10,
+  "successful_responses": 10,
+  "wall_clock_seconds": 1.0843677999982901,
+  "average_latency_seconds": 0.10796529999970517,
+  "median_latency_seconds": 0.10784439999952156,
+  "p95_latency_seconds": 0.1327385000004142,
+  "server_cpu_seconds_delta": 14.140625,
+  "server_peak_sampled_rss_mb": 1439.35546875,
+  "server_final_rss_mb": 1443.421875,
+  "cpu_measurement_note": "CPU time is the sum of user and system CPU seconds for the monitored Flask processes.",
+  "energy_measurement_note": "Electrical energy was not directly measured. CPU time and memory are not substitutes for watt-hours.",
+  "results": [
+    {
+      "sample": 1,
+      "status": 200,
+      "latency_seconds": 0.132739,
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "content_id": "a0907934-c88f-48a9-8970-58baabf72074",
+      "error": null
+    },
+    {
+      "sample": 2,
+      "status": 200,
+      "latency_seconds": 0.108678,
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "content_id": "869175dd-71ca-468b-b406-f45b2943b26c",
+      "error": null
+    },
+    {
+      "sample": 3,
+      "status": 200,
+      "latency_seconds": 0.103202,
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "content_id": "0e5b39d2-c226-42b8-8248-5370892116e5",
+      "error": null
+    },
+    {
+      "sample": 4,
+      "status": 200,
+      "latency_seconds": 0.110021,
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "content_id": "553d34a1-088a-46fe-858b-1e6623b0c195",
+      "error": null
+    },
+    {
+      "sample": 5,
+      "status": 200,
+      "latency_seconds": 0.083978,
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "content_id": "c4313675-4d8b-42c8-84cc-e5e154e64c09",
+      "error": null
+    },
+    {
+      "sample": 6,
+      "status": 200,
+      "latency_seconds": 0.102672,
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "content_id": "f54366c2-2d2b-45d6-8cf7-9edbd2dcf958",
+      "error": null
+    },
+    {
+      "sample": 7,
+      "status": 200,
+      "latency_seconds": 0.115015,
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "content_id": "9a494daf-7459-4d1f-9a03-ce1739dec3b5",
+      "error": null
+    },
+    {
+      "sample": 8,
+      "status": 200,
+      "latency_seconds": 0.107871,
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "content_id": "7525ec3f-d0aa-4441-9cc2-f5c7506eb088",
+      "error": null
+    },
+    {
+      "sample": 9,
+      "status": 200,
+      "latency_seconds": 0.107818,
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "content_id": "b088e327-130b-44a1-a6d0-d849f0ce5c8b",
+      "error": null
+    },
+    {
+      "sample": 10,
+      "status": 200,
+      "latency_seconds": 0.107661,
+      "label": "We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.",
+      "content_id": "4aecba62-4599-4b03-a51b-457d14f11281",
+      "error": null
+    }
+  ]
+}
