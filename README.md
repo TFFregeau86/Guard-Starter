@@ -1,35 +1,43 @@
-Provenance Guard
+# Provenance Guard
 
-A local Flask web service that examines submitted writing using authorship-related signals, combines the results, assigns a label, and records decisions in an audit log.
+A local Flask web service that examines submitted writing using authorship-related signals, combines the results, assigns a classification, and records decisions in an audit log.
 
-Current progress: Milestones 3, 4, and 5 are implemented in the current local version. The /submit route validates input, calls the GPT-2 detector and style signal, combines their scores, assigns a classification, and records the decision. The /appeal endpoint has also been implemented and tested successfully.
+**Current progress:** The core service, scoring pipeline, audit logging, appeal endpoint, and Unit 8 rate limiting are implemented. The service has been tested with a 72-sample evaluation, a dedicated flood test, and a 56-case attack suite.
 
-Unit 8 rate limiting and attack/evaluation evidence have been collected. The latest 72-sample evaluation provides additional information about the score distribution. However, the before/after evaluation currently shows no measurable improvement. A specific improvement must still be implemented and verified before claiming that requirement is complete.
+A measurable input-handling improvement was implemented and verified on November 9, 2026. However, a separate improvement to detector-classification performance has not yet been demonstrated. Several acceptance criteria also still require systematic evaluation against known ground-truth samples.
 
-What This Does
+---
+
+## 1. What This Extends
+
+Provenance Guard is a local Flask application that evaluates submitted writing using two signals:
+
+- A GPT-2-based model signal.
+- A heuristic stylometry signal.
 
 The submission flow is:
 
-A caller sends text and a creator_id to POST /submit.
-The route checks that the request contains a JSON object.
-The route validates that text and creator_id are non-empty strings.
-The route rejects text exceeding 100,000 characters.
-The GPT-2 detector calculates the model signal.
-The stylometry implementation calculates the style signal.
-The scoring module combines both signals using configured weights.
-The combined score determines the machine-readable classification and reader-facing label.
-The service creates a unique content_id.
-The decision is recorded in the audit log.
-The service returns the scores, classification, label, and submission ID as JSON.
+1. A caller sends text and a `creator_id` to `POST /submit`.
+2. The route checks that the request contains a JSON object.
+3. The route validates that `text` and `creator_id` are non-empty strings.
+4. The route rejects text exceeding 10,000 characters.
+5. The GPT-2 detector calculates the model signal.
+6. The stylometry implementation calculates the style signal.
+7. The scoring module combines both signals using configured weights.
+8. The combined score determines the machine-readable classification and reader-facing label.
+9. The service creates a unique `content_id`.
+10. The decision is recorded in the audit log.
+11. The service returns the scores, classification, label, and submission ID as JSON.
 
-The service also supports health checks, audit-log retrieval, invalid-request logging, and appeals. Rate limiting is configurable for Unit 8.
+The service also supports health checks, audit-log retrieval, invalid-request logging, appeals, and configurable rate limiting.
 
-Important limitation: These scores are heuristic indicators of writing patterns, not proof of authorship. Human writing can be incorrectly flagged, and AI-generated writing can receive a human or uncertain classification.
+**Important limitation:** These scores are heuristic indicators of writing patterns, not proof of authorship. Human writing can be incorrectly flagged, and AI-generated writing can receive a human or uncertain classification.
 
-Signals and Scoring
-Signal One — The Model Signal
+## 2. The Shape: Signals and Scoring
 
-Implementation: detector.model_signal(text)
+### Signal One — The Model Signal
+
+**Implementation:** `detector.model_signal(text)`
 
 The local GPT-2 language model estimates how predictable submitted text is and converts that information into a model score.
 
@@ -37,113 +45,116 @@ AI-generated writing can have predictable statistical patterns, but human writin
 
 The model cannot establish authorship or intent from text alone. Simple writing, second-language writing, short sentences, and other ordinary writing patterns can produce misleading results.
 
-Status: Implemented and connected to the submission route.
+**Status:** Implemented and connected to the submission route.
 
-Verified examples include:
+Verified examples from earlier submissions include:
 
-Model score of 0.2710 for an earlier submission.
-Model score of 0.5093 for the sentence about rain falling on an empty street.
-Model score of 0.7663 for the sentence about walking to the store.
+- Model score of `0.2710` for an earlier submission.
+- Model score of `0.5093` for the sentence about rain falling on an empty street.
+- Model score of `0.7663` for the sentence about walking to the store.
 
 These results demonstrate that the model produces different scores for different inputs.
 
-Signal Two — The Style Signal
+### Signal Two — The Style Signal
 
-Implementation: stylometry.style_signal(text)
+**Implementation:** `stylometry.style_signal(text)`
 
 The style signal measures stylistic properties of submitted text using heuristic measurements, including:
 
-Sentence-length spread: Measures variation in sentence lengths using the coefficient of variation.
-Type-token ratio: Measures vocabulary variety by dividing the number of unique words by the total number of words.
-Punctuation density: Measures punctuation relative to non-whitespace characters.
+- **Sentence-length spread:** Measures variation in sentence lengths using the coefficient of variation.
+- **Type-token ratio:** Measures vocabulary variety by dividing the number of unique words by the total number of words.
+- **Punctuation density:** Measures punctuation relative to non-whitespace characters.
 
-These measurements are combined into a score between 0.0 and 1.0. Higher scores are treated as more AI-like under the project's assumptions.
+These measurements are combined into a score between `0.0` and `1.0`. Higher scores are treated as more AI-like under the project's assumptions.
 
 The style signal does not understand meaning or prove authorship. Editing, quotations, writing ability, typos, and sentence structure can affect its measurements.
 
-Status: Implemented and connected to POST /submit.
+**Status:** Implemented and connected to `POST /submit`.
 
-Verified examples include:
+Verified examples from earlier submissions include:
 
-Style score of approximately 0.3064 for an earlier submission.
-Style score of approximately 0.4230 for the rain sentence.
-Style score of approximately 0.5366 for the store sentence.
+- Style score of approximately `0.3064` for an earlier submission.
+- Style score of approximately `0.4230` for the rain sentence.
+- Style score of approximately `0.5366` for the store sentence.
 
-These results demonstrate that the style signal is producing actual scores rather than always returning the placeholder value of 0.5.
+These results demonstrate that the style signal produces actual scores rather than always returning a placeholder value of `0.5`.
 
-The Combining Rule
+### The Combining Rule
 
-Implementation: scoring.py::combine_signals
+**Implementation:** `scoring.py::combine_signals`
 
 The service combines the model signal and style signal using a weighted average.
 
-The current configuration in config.py specifies:
+The current configuration in `config.py` specifies:
 
-Model signal weight: 0.5
-Style signal weight: 0.5
+- Model signal weight: `0.5`
+- Style signal weight: `0.5`
 
 The calculation is:
 
-python
+```python
 combined_score = (
     (model_weight * model_score + style_weight * style_score)
     / (model_weight + style_weight)
 )
-
+```
 
 With equal weights, both signals contribute equally to the combined score.
 
-The implementation validates the signal outputs in the submission route, combines the scores, and keeps the final score within the range 0.0–1.0.
+The implementation validates the signal outputs in the submission route, combines the scores, and keeps the final score within the range `0.0–1.0`.
 
-Example: Two Signals Produce Different Scores
+**Example: Two Signals Produce Different Scores**
 
 An earlier submission produced these results:
 
-Model score: 0.2710
-Style score: 0.3064
-Combined score: approximately 0.2887
+- Model score: `0.2710`
+- Style score: `0.3064`
+- Combined score: approximately `0.2887`
 
-The two signals produced different values, but both were below the human threshold of 0.35. Their weighted average was also below that threshold.
+The two signals produced different values, but both were below the human threshold of `0.35`. Their weighted average was also below that threshold.
 
 This demonstrates how the configured combining rule handles different signal values. It does not establish whether the submitted text was actually written by a human.
 
-Label Variants
+### Label Variants
 
-Implementation: scoring.py::score_to_label
+**Implementation:** `scoring.py::score_to_label`
 
-The configured thresholds in config.py are:
+The configured thresholds in `config.py` are:
 
-python
+```python
 HUMAN_THRESHOLD = 0.35
 AI_THRESHOLD = 0.65
+```
 
-Combined score	Machine-readable guess	Reader-facing label
-0.00–0.35, inclusive	human	This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.
-Greater than 0.35 and less than 0.65	unsure	We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI.
-0.65–1.00, inclusive	ai	This text has patterns often associated with AI-generated writing, but this result does not prove who wrote it.
+| Combined score | Machine-readable guess | Reader-facing label |
+|---|---|---|
+| 0.00–0.35, inclusive | `human` | This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it. |
+| Greater than 0.35 and less than 0.65 | `unsure` | We couldn't confidently distinguish the writing patterns. This result is uncertain and should not be treated as proof that the text was written by AI. |
+| 0.65–1.00, inclusive | `ai` | This text has patterns often associated with AI-generated writing, but this result does not prove who wrote it. |
 
-The numeric ranges refer to the combined score. The reader-facing message is returned in the label field, while the machine-readable classification is returned in the guess field.
+The numeric ranges refer to the combined score. The reader-facing message is returned in the `label` field, while the machine-readable classification is returned in the `guess` field.
 
-The implementation also returns the combined score in the confidence field. This is a numeric heuristic score, not a calibrated probability that the classification is correct.
+The implementation also returns the combined score in the `confidence` field. This is a numeric heuristic score, not a calibrated probability that the classification is correct.
 
-Verification completed: Running python scoring.py displayed the three ranges, tested representative scores of 0.20, 0.50, and 0.80, and printed the signal-combination test. A separate command verified that scores of 0.35 and 0.34 both return the human classification.
+**Verification completed:** Running `python scoring.py` displayed the three ranges, tested representative scores of `0.20`, `0.50`, and `0.80`, and printed the signal-combination test. A separate command verified that scores of `0.35` and `0.34` both return the human classification.
 
 The thresholds are configurable and have not been established as optimal through a sufficiently large evaluation dataset. A score in the high-confidence AI range must not be interpreted as definitive proof of AI authorship.
 
-Sample Runs
-A Submission
+## 3. Running It and Sample Runs
+
+### A Submission
 
 Request:
 
-bash
+```bash
 curl.exe -X POST http://127.0.0.1:5000/submit \
   -H "Content-Type: application/json" \
   -d "{\"text\":\"The rain fell softly on the empty street. The windows glowed warmly as evening settled over the town.\",\"creator_id\":\"writer-001\"}"
-
+```
 
 Observed response:
 
-json
+```json
 {
   "combined_score": 0.46614423716209413,
   "confidence": 0.46614423716209413,
@@ -155,25 +166,25 @@ json
   "style_score": 0.4229884743241883,
   "text_length": 101
 }
-
+```
 
 This submission demonstrates that both signals are connected, the scores are combined, the label is assigned, and a unique content ID is returned.
 
-The combined score falls between 0.35 and 0.65, so the service returns the unsure classification.
+The combined score falls between `0.35` and `0.65`, so the service returns the `unsure` classification.
 
-Another Submission
+### Another Submission
 
 Request:
 
-bash
+```bash
 curl.exe -X POST http://127.0.0.1:5000/submit \
   -H "Content-Type: application/json" \
   -d "{\"text\":\"I walked to the store. I bought milk and bread. Then I went home.\",\"creator_id\":\"writer-001\"}"
+```
 
+Observed response:
 
-Observed result:
-
-json
+```json
 {
   "combined_score": 0.6514305450013973,
   "confidence": 0.6514305450013973,
@@ -185,30 +196,34 @@ json
   "style_score": 0.5365610900027947,
   "text_length": 65
 }
+```
 
+This submission reached the `ai` classification because its combined score was above the `0.65` threshold. This is an example of the service's classification behavior, not proof that the text was AI-generated.
 
-This submission reached the ai classification because its combined score was above the 0.65 threshold. This is an example of the service's classification behavior, not proof that the text was AI-generated.
+### Latest 72-Sample Evaluation
 
-Latest 72-Sample Evaluation
-
-Evaluation file: results/run_2026-11-02_1155_after.md
+**Evaluation file:** `results/run_2026-11-02_1155_after.md`
 
 A separate evaluation included 72 submissions. PowerShell was used to extract the individual scores and calculate their averages, minimums, and maximums.
 
-Individual Signal Results
-Measurement	Average	Minimum	Maximum
-Model score	0.6651	0.1452	0.8705
-Style score	0.3569	0.2292	0.4687
+**Individual Signal Results**
+
+| Measurement | Average | Minimum | Maximum |
+|---|---:|---:|---:|
+| Model score | 0.6651 | 0.1452 | 0.8705 |
+| Style score | 0.3569 | 0.2292 | 0.4687 |
 
 The model signal produced a noticeably higher average than the style signal.
 
 This suggests that the two heuristic signals respond differently to the tested writing samples.
 
-Combined Score Results
+**Combined Score Results**
 
-The combined score was returned by the API in the confidence field. The average was calculated from the 72 confidence values.
+The combined score was returned by the API in the `confidence` field. The average was calculated from the 72 confidence values.
 
-powershell
+PowerShell command:
+
+```powershell
 $path = "results/run_2026-11-02_1155_after.md"
 
 $combined = Select-String -Path $path `
@@ -218,23 +233,24 @@ $combined = Select-String -Path $path `
     }
 
 $combined | Measure-Object -Average -Minimum -Maximum
-
+```
 
 Observed results:
 
-Measurement	Result
-Number of submissions	72
-Average combined score	0.5110
-Minimum combined score	0.2053
-Maximum combined score	0.6376
+| Measurement | Result |
+|---|---:|
+| Number of submissions | 72 |
+| Average combined score | 0.5110 |
+| Minimum combined score | 0.2053 |
+| Maximum combined score | 0.6376 |
 
-The average combined score was approximately 0.5110, which falls inside the unsure classification range.
+The average combined score was approximately `0.5110`, which falls inside the `unsure` classification range.
 
-Classification Distribution
+**Classification Distribution**
 
 The classification counts were extracted from the same report:
 
-powershell
+```powershell
 Select-String `
     -Path $path `
     -Pattern '"guess": "ai"|"guess": "human"|"guess": "unsure"' |
@@ -245,20 +261,20 @@ Select-String `
     } |
     Group-Object |
     Select-Object Name, Count
-
+```
 
 Observed results:
 
-Classification	Count	Percentage
-human	6	8.33%
-unsure	66	91.67%
-ai	0	0.00%
-Total	72	100%
-Interpretation
+| Classification | Count | Percentage |
+|---|---:|---:|
+| human | 6 | 8.33% |
+| unsure | 66 | 91.67% |
+| ai | 0 | 0.00% |
+| **Total** | **72** | **100%** |
 
-The highest observed combined score was approximately 0.6376, below the configured AI threshold of 0.65.
+**Interpretation**
 
-Consequently, none of these 72 submissions received an AI classification.
+The highest observed combined score was approximately `0.6376`, below the configured AI threshold of `0.65`. Consequently, none of these 72 submissions received an AI classification.
 
 The results indicate that the current configuration is conservative for this particular test set. However, they do not establish detector accuracy because the ground-truth authorship labels for the 72 submissions have not been systematically compared with the predicted classifications.
 
@@ -266,37 +282,39 @@ The relatively high model scores and lower style scores also demonstrate that th
 
 The results should be used as experimental evidence rather than proof that the detector can reliably distinguish human and AI-generated writing.
 
-Audit Log
+## 4. Instrumentation
 
-Implementation: audit.py
+### Audit Log
+
+**Implementation:** `audit.py`
 
 The audit log records decisions and rejected requests in JSON Lines format, with one JSON object per line.
 
 Request:
 
-bash
+```bash
 curl.exe "http://127.0.0.1:5000/log?limit=5"
-
+```
 
 The log returns JSON containing recent entries.
 
-A successful submission contains the nine required decision fields:
+A successful submission contains the nine decision fields:
 
-timestamp
-content_id
-creator_id
-guess
-model_score
-style_score
-combined_score
-label
-status
+- `timestamp`
+- `content_id`
+- `creator_id`
+- `guess`
+- `model_score`
+- `style_score`
+- `combined_score`
+- `label`
+- `status`
 
-The initial decision status is decided.
+The initial decision status is `decided`.
 
 Example of a recorded decision:
 
-json
+```json
 {
   "combined_score": 0.46614423716209413,
   "content_id": "e8fa3cca-b691-4711-af46-ba7a1218c1ee",
@@ -308,104 +326,311 @@ json
   "style_score": 0.4229884743241883,
   "timestamp": "2026-10-25T11:20:11+00:00"
 }
-
+```
 
 The audit log also records rejected requests with information such as the creator ID, rejection reason, event type, status, and timestamp.
 
-Verified rejection reasons include:
+Verified rejection reasons from the project's tests include:
 
-invalid_text
-invalid_creator_id
-invalid_request
+- `invalid_text`
+- `invalid_creator_id`
+- `invalid_request`
+- `missing_or_empty_text`
+- `missing_creator_id`
+- `text_too_short`
+- `text_too_long`
+- `invalid_json`
+- `rate_limited`
 
 To find the configured audit-log path, run:
 
-bash
+```bash
 python -c "import config; print(config.AUDIT_LOG)"
+```
 
+The log is append-only during normal decision and appeal operations. The `audit.clear()` utility exists for clearing the log between tests; it should not be used when existing evidence must be preserved.
 
-The log is append-only during normal decision and appeal operations. The audit.clear() utility exists for clearing the log between tests; it should not be used when existing evidence must be preserved.
+### Selected Audit Evidence
 
-Appeals
+The following examples are from the November 9 attack testing and related verification runs. They are selected fields from actual audit events; the complete records, including timestamps and other available fields, are preserved in the audit files.
 
-Implementation: POST /appeal
+**1. Evasion test — EV01**
+
+```json
+{
+  "creator_id": "attacker_EV01",
+  "guess": "human",
+  "combined_score": 0.27884523026890057,
+  "status": "decided"
+}
+```
+
+**2. Evasion test — EV10**
+
+```json
+{
+  "creator_id": "attacker_EV10",
+  "guess": "ai",
+  "combined_score": 0.7331687267332978,
+  "status": "decided"
+}
+```
+
+**3. False-positive test — FP07**
+
+```json
+{
+  "creator_id": "attacker_FP07",
+  "guess": "ai",
+  "combined_score": 0.6816354162608713,
+  "status": "decided"
+}
+```
+
+FP07 is an important failure because the test was designed as a false-positive case, but the detector classified it as AI.
+
+**4. Prompt-injection test — PI02**
+
+```json
+{
+  "creator_id": "attacker_PI02",
+  "guess": "human",
+  "combined_score": 0.27002910624218573,
+  "status": "decided"
+}
+```
+
+**5. Empty input — MF01**
+
+```json
+{
+  "creator_id": "attacker_MF01",
+  "event": "rejected",
+  "reason": "missing_or_empty_text",
+  "status": "rejected"
+}
+```
+
+**6. Short input — MF02**
+
+```json
+{
+  "creator_id": "attacker_MF02",
+  "event": "rejected",
+  "reason": "text_too_short",
+  "status": "rejected"
+}
+```
+
+**7. Oversized input — MF08**
+
+```json
+{
+  "creator_id": "attacker_MF08",
+  "event": "rejected",
+  "reason": "text_too_long",
+  "status": "rejected"
+}
+```
+
+**8. Missing creator ID**
+
+```json
+{
+  "creator_id": "unknown",
+  "event": "rejected",
+  "reason": "missing_creator_id",
+  "status": "rejected"
+}
+```
+
+**9. Invalid JSON**
+
+```json
+{
+  "creator_id": "unknown",
+  "event": "rejected",
+  "reason": "invalid_json",
+  "status": "rejected"
+}
+```
+
+**10. Rate-limit rejection**
+
+```json
+{
+  "creator_id": "attacker_flood",
+  "event": "rejected",
+  "limit": "10 per 1 minute",
+  "reason": "rate_limited",
+  "status": "rejected"
+}
+```
+
+The `attacker_flood` entry came from the attack-suite flood cases. The separate dedicated flood test used `flood_tester`, as documented below.
+
+These entries demonstrate that the service records both successful classifications and rejected requests. The log also makes it possible to investigate false positives and identify requests that trigger input validation or rate limits.
+
+The complete extracted log is saved in:
+
+`results/audit_extract.json`
+
+The November 9 final extraction was 76,421 bytes.
+
+### Latest Rate-Limit Audit Evidence
+
+On November 9, 2026, I ran a 15-submission flood test using the same creator ID, `flood_tester`.
+
+I checked the audit log using:
+
+```bash
+curl "http://127.0.0.1:5000/log?limit=20"
+```
+
+The returned log contained ten accepted decision entries and five rejected entries for `flood_tester`.
+
+Each of the five rejected entries included:
+
+```json
+{
+  "creator_id": "flood_tester",
+  "event": "rejected",
+  "limit": "10 per 1 minute",
+  "reason": "rate_limited",
+  "status": "rejected"
+}
+```
+
+All five rate-limit rejections were visible in the audit log.
+
+The extracted dedicated flood evidence is saved in:
+
+`results/flood_audit_evidence.json`
+
+This confirms that rejected requests are recorded in the audit log, rather than only being returned as HTTP 429 responses.
+
+## 5. What It Costs
+
+The current implementation uses a local GPT-2 model and in-memory rate-limit storage.
+
+The GPT-2 model runs locally rather than through a paid hosted inference API. Therefore, the model inference component does not incur a per-request hosted API charge in the current configuration.
+
+The service still uses local computing resources, including CPU or GPU time, memory, and storage.
+
+**Configuration**
+
+- Per-minute limit: 10 submissions per creator.
+- Per-day limit: 200 submissions per creator.
+- Storage: In-memory (`memory://`).
+
+Rate limits are applied per `creator_id` when a valid creator ID is supplied. Requests without a valid creator ID fall back to the caller's IP address.
+
+These are development limits, not production-tested values.
+
+The in-memory storage is suitable for local development but would need shared, persistent storage for a multi-instance production service.
+
+**Cost measurement limitation:** A complete financial cost-per-run estimate has not yet been established. It would require measuring local compute and energy costs rather than assuming that local inference is entirely cost-free.
+
+For a workload of 100 users per day, the daily submission count would depend on the average number of submissions per user:
+
+```text
+Daily submissions = 100 × average submissions per user
+```
+
+The local inference cost would then need to be estimated from measured compute time, hardware power consumption, and electricity price. No measured dollar amount is claimed here.
+
+## 6. Run Log and Verdicts
+
+### Appeals
+
+**Implementation:** `POST /appeal`
 
 The appeal endpoint allows a writer to challenge an existing decision.
 
 The endpoint:
 
-Validates that the request is a JSON object.
-Checks that content_id is a non-empty string.
-Checks that reasoning is a non-empty string.
-Verifies that an original decision exists for the submitted content ID.
-Records the appeal in the audit log.
-Returns a successful response with the status under_review.
+1. Validates that the request is a JSON object.
+2. Checks that `content_id` is a non-empty string.
+3. Checks that `reasoning` is a non-empty string.
+4. Verifies that an original decision exists for the submitted content ID.
+5. Records the appeal in the audit log.
+6. Returns a successful response with the status `under_review`.
 
 An appeal does not delete or overwrite the original decision. Instead, a separate audit entry records the appeal and its reasoning.
 
-Example Appeal
+**Verified November 9 Appeal Test**
 
-Request:
+The test first submitted writing and received this content ID:
 
-bash
-curl.exe -X POST http://127.0.0.1:5000/appeal \
+`670e93bc-13da-4821-ba5e-5dad33a80e30`
+
+The appeal request was:
+
+```bash
+curl -i -X POST http://127.0.0.1:5000/appeal \
   -H "Content-Type: application/json" \
-  -d "{\"content_id\":\"e8fa3cca-b691-4711-af46-ba7a1218c1ee\",\"reasoning\":\"I wrote this text myself and would like the decision reviewed.\"}"
-
+  -d '{"content_id":"670e93bc-13da-4821-ba5e-5dad33a80e30","reasoning":"I wrote this text myself based on my personal camping experience. I would like the decision reviewed."}'
+```
 
 Observed response:
 
-json
+```json
 {
-  "content_id": "e8fa3cca-b691-4711-af46-ba7a1218c1ee",
+  "content_id": "670e93bc-13da-4821-ba5e-5dad33a80e30",
   "message": "Your appeal has been recorded. This submission is now under review.",
   "ok": true,
   "status": "under_review"
 }
+```
 
+The audit log showed the original decision and the separate appeal event using the same content ID:
 
-This confirms that the appeal endpoint successfully accepted an appeal for an existing content ID.
+- Original decision: `decided`
+- Appeal event: `appeal`
+- Appeal status: `under_review`
 
-The audit log records a separate entry containing:
+This confirms that the appeal was appended without deleting the original decision.
 
-The original content_id
-The associated creator_id
-event: "appeal"
-The appeal reasoning
-status: "under_review"
-
-An appeal submitted for a nonexistent content ID returns a 404 response. An earlier test using a placeholder content ID verified that behavior.
+An earlier test using a nonexistent placeholder content ID returned HTTP 404.
 
 The endpoint records an appeal and its review status. It does not independently determine whether the original classification was correct.
 
-Current Verification
-Verified So Far
-POST /ping returns HTTP 200 and the expected JSON response.
-GET /health returns the service status.
-POST /submit validates request data.
-Missing or invalid submission fields are rejected.
-Whitespace-only text returns HTTP 400 with invalid_text.
-Missing creator_id returns HTTP 400 with invalid_creator_id.
-Invalid JSON returns HTTP 400 with invalid_request.
-The GPT-2 detector returns a model score.
-stylometry.style_signal(text) returns a style score.
-scoring.combine_signals() combines the two signals.
-scoring.score_to_label() returns a classification and reader-facing message.
-The configured label ranges print correctly.
-The boundary scores 0.34 and 0.35 return the human classification.
-A successful submission receives a unique content_id.
-The audit writer records decisions with all nine required fields.
-GET /log returns recorded decisions and rejected requests.
-An appeal for an existing content ID returns HTTP 200 and records under_review.
-An appeal for a nonexistent content ID is rejected with HTTP 404.
-The audit log contains the appeal event alongside the original decision.
-The environment check passes all nine checks when run inside the activated virtual environment.
-The latest 72-sample evaluation produced 72 model scores, 72 style scores, and 72 combined scores.
-Acceptance Criteria Still Requiring Systematic Evaluation
+### Current Verification
+
+**Verified So Far**
+
+- `POST /ping` returns HTTP 200 and the expected JSON response.
+- `GET /health` returns the service status.
+- `POST /submit` validates request data.
+- Missing or invalid submission fields are rejected.
+- Whitespace-only text returns HTTP 400 with `invalid_text` in earlier validation tests.
+- Missing `creator_id` returns HTTP 400 with `invalid_creator_id` in earlier validation tests.
+- Invalid JSON returns HTTP 400 with `invalid_request` or `invalid_json`, depending on the tested request path.
+- The GPT-2 detector returns a model score.
+- `stylometry.style_signal(text)` returns a style score.
+- `scoring.combine_signals()` combines the two signals.
+- `scoring.score_to_label()` returns a classification and reader-facing message.
+- The configured label ranges print correctly.
+- The boundary scores `0.34` and `0.35` return the human classification.
+- A successful submission receives a unique `content_id`.
+- The audit writer records decisions with all nine required fields.
+- `GET /log` returns recorded decisions and rejected requests.
+- An appeal for an existing content ID returns HTTP 200 and records `under_review`.
+- An appeal for a nonexistent content ID is rejected with HTTP 404.
+- The audit log contains the appeal event alongside the original decision.
+- The environment check passed all nine checks in an earlier run inside the activated virtual environment.
+- The 72-sample evaluation produced 72 model scores, 72 style scores, and 72 combined scores.
+- The November 9 dedicated flood test produced ten HTTP 200 responses followed by five HTTP 429 responses.
+- All five dedicated flood rejections were verified in the audit log.
+- The November 9 final 56-case attack suite completed with zero automatically marked BROKE cases.
+- The final attack suite verified the MF02 input-handling fix with an HTTP 400 response.
+- The final attack suite also exercised malformed requests, oversized input, and flood cases.
+
+**Acceptance Criteria Still Requiring Systematic Evaluation**
 
 The following tests must be completed and documented before claiming that all evaluation criteria have passed.
 
-1. False Positives on Human Writing
+**1. False Positives on Human Writing**
 
 Submit ten pieces of writing known to be human-written.
 
@@ -413,60 +638,65 @@ The target is for no more than one to receive the high-confidence AI classificat
 
 The actual authorship of every sample must be known.
 
-2. Score Separation
+**2. Score Separation**
 
 Submit five human-written samples and five AI-generated samples.
 
 Calculate the mean combined score for each group.
 
-The target is for the AI-generated group to have an average at least 0.15 higher than the human-written group.
+The target is for the AI-generated group to have an average at least `0.15` higher than the human-written group.
 
 The existing 72-sample evaluation does not independently satisfy this requirement because the ground-truth labels have not been systematically established.
 
-3. All Three Classifications Are Reachable
+**3. All Three Classifications Are Reachable**
 
 Verify that actual submissions receive each classification:
 
-human
-unsure
-ai
+- `human`
+- `unsure`
+- `ai`
 
 The scoring tests demonstrate that all three classification branches are available.
 
-The observed submission results already include unsure and ai. A new successful submission with a human result should be recorded to complete this particular verification.
+Observed submission and attack results already include all three classifications. For example, the November 9 attack suite included human, unsure, and AI results.
 
-4. Appeals Are Recorded
+The classification branches are therefore reachable in the current tests, although their accuracy has not been established.
 
-Verify that a valid appeal for an existing content ID returns success, creates an audit entry, and records under_review.
+**4. Appeals Are Recorded**
+
+Verify that a valid appeal for an existing content ID returns success, creates an audit entry, and records `under_review`.
 
 Also verify that nonexistent content IDs are rejected.
 
-The basic successful and nonexistent-ID cases have already been tested. Preserve the corresponding evidence in the audit log.
+The successful and nonexistent-ID cases have been tested. The November 9 appeal and its matching original decision are visible in the audit log.
 
-5. Invalid Input Is Handled Safely
+**5. Invalid Input Is Handled Safely**
 
 Run ten invalid-input tests covering:
 
-Missing text
-Empty text
-Whitespace-only text
-Non-string text
-Missing creator IDs
-Invalid JSON
-Other relevant malformed requests
+- Missing text.
+- Empty text.
+- Whitespace-only text.
+- Non-string text.
+- Missing creator IDs.
+- Invalid JSON.
+- Other relevant malformed requests.
 
 Verify that each request returns an appropriate 4xx response without crashing the service.
 
-Then confirm that POST /ping still returns HTTP 200.
+Then confirm that `POST /ping` still returns HTTP 200.
 
-Several invalid-input cases have already passed, but the complete ten-case evaluation has not yet been documented.
+Several invalid-input cases have passed, and the final attack suite exercised multiple malformed requests. However, the complete ten-case acceptance test and its subsequent `/ping` check have not yet been documented together.
 
-Unit 8 — Rate Limiting
-Configuration
-Per-minute limit: 10 submissions per creator.
-Per-day limit: 200 submissions per creator.
-Storage: In-memory (memory://).
-Why These Limits?
+### Unit 8 — Rate Limiting
+
+**Configuration**
+
+- Per-minute limit: 10 submissions per creator.
+- Per-day limit: 200 submissions per creator.
+- Storage: In-memory (`memory://`).
+
+**Why These Limits?**
 
 The limit of 10 submissions per minute allows a writer to submit several pieces without being unnecessarily restricted, while stopping scripts that rapidly submit variations to probe the detector's thresholds.
 
@@ -474,207 +704,497 @@ The daily limit of 200 permits normal testing while placing a cap on repeated su
 
 These are development limits, not production-tested values.
 
-Flood Test
+**Flood Test — October 25, 2026**
 
 Command:
 
-bash
+```bash
 python run_attacks.py --flood 15
+```
 
+Earlier results:
 
-Results from October 25, 2026:
-
-text
+```text
 200 200 200 200 200 200 200 200 200 200 429 429 429 429 429
-
-
-Result: 10 submissions succeeded, and 5 were rejected with HTTP 429 (Too Many Requests).
-
-The rate limiter is working as intended for this test.
+```
 
 Output file:
 
-results/flood_2026-10-25_1854.md
+`results/flood_2026-10-25_1854.md`
 
-Limitation: The limiter uses in-memory storage, so its counters reset when the service restarts. It is suitable for local development but would need shared, persistent storage for a multi-instance production service.
+**Latest Dedicated Flood Test — November 9, 2026**
 
-Unit 8 — Attack Evaluation
-Before Run
+Command:
+
+```bash
+python run_attacks.py --flood 15
+```
+
+Actual output:
+
+```text
+15 submissions as 'flood_tester' against http://127.0.0.1:5000
+The first one is slow while the model loads.
+
+[ 1/15] 200
+[ 2/15] 200
+[ 3/15] 200
+[ 4/15] 200
+[ 5/15] 200
+[ 6/15] 200
+[ 7/15] 200
+[ 8/15] 200
+[ 9/15] 200
+[10/15] 200
+[11/15] 429
+[12/15] 429
+[13/15] 429
+[14/15] 429
+[15/15] 429
+```
+
+Summary:
+
+```text
+200 200 200 200 200 200 200 200 200 200 429 429 429 429 429
+
+5 of 15 were rate limited.
+```
+
+Output file:
+
+`results/flood_2026-11-09_1130.md`
+
+**Result:** Ten submissions succeeded, and five were rejected with HTTP 429 (Too Many Requests).
+
+The latest `/health` check during subsequent verification returned:
+
+```json
+{
+  "detector_loaded": true,
+  "detector_model": "gpt2",
+  "log_entries": 553,
+  "ok": true,
+  "rate_limiting": true
+}
+```
+
+This is the observed health response from the November 9 regression testing, not the earlier pre-loading health result.
+
+**Audit Verification**
+
+The audit log was checked after the dedicated flood test:
+
+```bash
+curl "http://127.0.0.1:5000/log?limit=20"
+```
+
+The returned entries included five rejected requests with:
+
+- `creator_id`: `flood_tester`
+- `event`: `rejected`
+- `reason`: `rate_limited`
+- `status`: `rejected`
+- `limit`: `10 per 1 minute`
+
+**Conclusion:** The rate limiter correctly enforced the configured per-minute limit during the test, and the service recorded the rejected requests in its audit log.
+
+**Limitation:** The limiter uses in-memory storage, so its counters reset when the service restarts. It is suitable for local development but would need shared, persistent storage for a multi-instance production service.
+
+### Unit 8 — Attack Evaluation
+
+The attack set is used to test how the service responds to false-positive attempts, evasion, prompt injection, malformed inputs, and repeated submissions.
+
+The preview command:
+
+```bash
+python run_attacks.py --set . --show
+```
+
+successfully displayed 56 attacks without sending them or writing a report.
+
+The 56 cases include:
+
+- Evasion cases.
+- False-positive cases.
+- Prompt-injection cases.
+- Malformed text cases.
+- Malformed request cases.
+- Repeated-submission flood cases.
+
+The preview is not itself an attack-test result because no requests were sent.
+
+**Earlier Before Run**
 
 Attack report:
 
-results/attack_run_2026-10-25_1922_before.md
+`results/attack_run_2026-10-25_1922_before.md`
 
-The practice attack set contained six cases:
+The earlier practice attack set contained six cases:
 
-ID	Family	Observed result	Interpretation
-FP01	false_positive	HTTP 200, unsure, score approximately 0.584	The service did not return an AI classification for this case.
-EV01	evasion	HTTP 200, unsure, score approximately 0.577	The service did not return a human classification for this case.
-PI01	prompt_injection	HTTP 200, unsure, score approximately 0.355	The response was uncertain; this alone does not prove prompt-injection resistance.
-MR01	malformed	HTTP 400	The malformed request was rejected.
-EV02	evasion	HTTP 200, unsure, score approximately 0.432	The service did not return a human classification for this case.
-FP02	false_positive	HTTP 200, unsure, score approximately 0.569	The service did not return an AI classification for this case.
+| ID | Family | Observed result | Interpretation |
+|---|---|---|---|
+| FP01 | false_positive | HTTP 200, unsure, score approximately 0.584 | The service did not return an AI classification for this case. |
+| EV01 | evasion | HTTP 200, unsure, score approximately 0.577 | The service did not return a human classification for this case. |
+| PI01 | prompt_injection | HTTP 200, unsure, score approximately 0.355 | The response was uncertain; this alone does not prove prompt-injection resistance. |
+| MR01 | malformed | HTTP 400 | The malformed request was rejected. |
+| EV02 | evasion | HTTP 200, unsure, score approximately 0.432 | The service did not return a human classification for this case. |
+| FP02 | false_positive | HTTP 200, unsure, score approximately 0.569 | The service did not return an AI classification for this case. |
 
-The five valid requests returned unsure, and the malformed request returned HTTP 400.
+The five valid requests returned `unsure`, and the malformed request returned HTTP 400.
 
 The report's verdicts should be assessed against the assignment's precise definitions of HELD and BROKE. An unsure response is not proof that authorship was identified correctly.
 
-After Run
+**Earlier After Run**
 
 Attack report:
 
-results/attack_run_2026-10-25_1935_after.md
+`results/attack_run_2026-10-25_1935_after.md`
 
 The same six cases were run again.
 
 The observed results were:
 
-ID	Observed result
-FP01	HTTP 200, unsure
-EV01	HTTP 200, unsure
-PI01	HTTP 200, unsure
-MR01	HTTP 400
-EV02	HTTP 200, unsure
-FP02	HTTP 200, unsure
-Before/After Evaluation
-Evaluation	Before report	After report	Observation
-Attack set	attack_run_2026-10-25_1922_before.md	attack_run_2026-10-25_1935_after.md	Same reported classifications and HTTP statuses.
-Scenario evaluation	run_2026-10-25_1928_before.md	run_2026-10-25_1935_after.md	The displayed results are unchanged across the five scenarios.
+| ID | Observed result |
+|---|---|
+| FP01 | HTTP 200, unsure |
+| EV01 | HTTP 200, unsure |
+| PI01 | HTTP 200, unsure |
+| MR01 | HTTP 400 |
+| EV02 | HTTP 200, unsure |
+| FP02 | HTTP 200, unsure |
 
-Current conclusion: The tests ran successfully, but the available output does not demonstrate a measurable improvement between the before and after runs.
+**Before/After Evaluation**
 
-The after run should not be described as a successful improvement until a specific code change is made and its effect is demonstrated through testing.
+| Evaluation | Before report | After report | Observation |
+|---|---|---|---|
+| Attack set | `attack_run_2026-10-25_1922_before.md` | `attack_run_2026-10-25_1935_after.md` | Same reported classifications and HTTP statuses. |
+| Scenario evaluation | `run_2026-10-25_1928_before.md` | `run_2026-10-25_1935_after.md` | The displayed results are unchanged across the five scenarios. |
 
-Scenario Evaluation Details
+**Current conclusion:** The October 25 before/after tests ran successfully, but the available output does not demonstrate a measurable improvement between those runs.
+
+The after run should not be described as a successful classification improvement. The November 9 input-handling fix is a separate improvement, documented in Section 7.
+
+**Scenario Evaluation Details**
 
 The evaluation script ran three trials for each of five scenarios:
 
-Scenario	Observed result	Limitation
-My own writing	All displayed classifications were unsure	The samples must genuinely represent the intended human-writing test group.
-Label coverage	All displayed classifications were unsure	The results do not demonstrate all three classifications with the selected samples.
-Bad input	Outputs displayed as —	Confirm the report or application responses show that each input was safely rejected.
-Prompt injection resistance	human, unsure across the displayed samples	The outputs are unchanged between runs and do not establish complete resistance.
-Appeal path	unsure	This scenario alone does not verify the actual appeal endpoint and audit event.
+| Scenario | Observed result | Limitation |
+|---|---|---|
+| My own writing | All displayed classifications were unsure | The samples must genuinely represent the intended human-writing test group. |
+| Label coverage | All displayed classifications were unsure | The results do not demonstrate all three classifications with the selected samples. |
+| Bad input | Outputs displayed as — | Confirm the report or application responses show that each input was safely rejected. |
+| Prompt injection resistance | human, unsure across the displayed samples | The outputs are unchanged between runs and do not establish complete resistance. |
+| Appeal path | unsure | This scenario alone does not verify the actual appeal endpoint and audit event. |
 
 After report:
 
-results/run_2026-10-25_1935_after.md
+`results/run_2026-10-25_1935_after.md`
 
 The evaluation scenarios are useful for repeatable testing, but their outputs should be checked against the actual acceptance criteria.
 
-In particular, an appeal workflow should be tested by submitting a real existing content_id to POST /appeal and confirming the resulting audit entry.
+In particular, an appeal workflow should be tested by submitting a real existing `content_id` to `POST /appeal` and confirming the resulting audit entry. The separate November 9 appeal test now provides that evidence.
 
-Audit Evidence for Unit 8
+**November 9 Attack Runs**
 
-The attack reports include content IDs for the five accepted submissions. Those IDs can be used to locate their corresponding decisions in the audit log.
+An earlier 56-case run was saved as:
 
-Refresh the audit extract after running the tests:
+`results/attack_run_2026-11-09_1148.md`
 
-bash
-curl.exe "http://127.0.0.1:5000/log?limit=200" -o results/audit_extract.json
+The final regression run was then completed after restoring the original application and reapplying the MF02 fix.
 
+Command:
 
-The assignment asks for at least ten audit entries in the README.
+```bash
+python run_attacks.py --set . --label final
+```
 
-Select actual entries from the audit extract, including a rejected request if one is present, and preserve the original values.
+Final report:
 
-Do not invent audit records or claim that the extract contains ten distinct relevant entries without checking it.
+`results/attack_run_2026-11-09_1215_final.md`
 
-Useful identifiers from the before attack run include:
+The final run contained 56 attacks. Its results were:
 
-FP01: dc39f731-9e4f-49d6-8833-7d4ec03039c0
-EV01: 3968b8a6-04ef-4547-afd8-91af5a7c29e1
-PI01: 316262bc-a163-4bcd-a8f2-97a8609313cd
-EV02: df45f902-53eb-4149-b843-48701b909e17
-FP02: 50e80379-3576-4b59-9282-fdb5f55f6bb4
+| HTTP response | Count |
+|---|---:|
+| 200 | 39 |
+| 400 | 14 |
+| 413 | 1 |
+| 429 | 2 |
+| **Total** | **56** |
 
-The audit log records decisions and rejection events. A response's unsure classification means the service could not confidently distinguish the writing patterns; it should not be treated as proof of authorship.
+The runner reported:
 
-How I Used AI
-Moment 1 — Diagnosing Flask Routes
+- 56 attacks executed.
+- 0 automatically marked BROKE.
+- 56 cases left for manual judgment.
 
-What I asked for: Help testing the Flask routes and diagnosing connection resets.
+Notable results included:
 
-What came back: A sequence of checks for /health, /ping, and the detector.
+- EV01 returned a `human` classification.
+- EV10 returned an `ai` classification.
+- FP07 returned an `ai` classification despite being a false-positive test.
+- PI02 returned a `human` classification.
+- MF01 returned HTTP 400.
+- MF02 returned HTTP 400 after the fix.
+- MF08 returned HTTP 413.
+- RQ01–RQ12 returned HTTP 400.
+- FL01_01–FL01_10 returned HTTP 200.
+- FL01_11–FL01_12 returned HTTP 429.
 
-What I changed: Tested the detector directly and confirmed it returned a score independently of Flask.
+**Interpretation**
 
-Moment 2 — Implementing Submission Logging
+The zero BROKE count means the attack runner did not automatically identify a crash, 5xx response, or missing response in this run. It does not mean that all 56 tests passed their intended security or classification objectives.
 
-What I asked for: Help implementing submission logging.
+The final run confirms that the application handled the tested request formats without an automatically detected server failure. The classification results still need manual interpretation against their expected targets.
 
-What came back: Guidance for calling audit.log_decision() and checking the log.
+The full audit extract is saved in:
 
-What I changed: Added the logging call to the submission route and verified that real submissions appeared in /log.
+`results/audit_extract.json`
 
-Moment 3 — Implementing Scoring and Appeals
+The November 9 dedicated flood evidence is saved in:
 
-What I asked for: Help implementing the style signal, score-combination rule, label thresholds, and appeal workflow.
+`results/flood_audit_evidence.json`
 
-What came back: Guidance for combining the model and style scores, returning reader-facing labels, and recording appeals.
+## 7. The Improvement
 
-What I changed: Implemented the style signal and scoring functions, connected them to /submit, configured the weights and thresholds, and tested the appeal endpoint against an existing content ID.
+### Verified Input-Handling Improvement — MF02
 
-Moment 4 — Unit 8 Rate Limiting and Evaluation
+During November 9 testing, the single-character malformed-input case exposed an unhandled `ValueError` in the detector.
 
-What I asked for: Help collecting rate-limit evidence, running the attack set, creating evaluation scenarios, and interpreting the before/after results.
+**Before:** Submitting a single character caused an HTTP 500 response because the detector could not score text containing too few tokens.
 
-What came back: Commands for running the flood test, exporting audit records, running attack and scenario evaluations, and documenting the results.
+**Cause:** The detector's scoring function raised a `ValueError` when the input contained too few tokenizer tokens. The submission route did not handle this exception.
 
-What I changed: Ran the six-case attack set and five scenario evaluations, preserved the reports, and documented the current findings.
+**Change:** I restored the original `app.py` from Git and reapplied a focused exception handler around the model-scoring call. The route now records the rejection and returns a structured HTTP 400 response.
 
-The displayed before/after outputs were unchanged, so an improvement that produces a demonstrable difference remains to be completed.
+The handler is:
+
+```python
+try:
+    model_score = float(detector.model_signal(text))
+except ValueError as exc:
+    audit.log_rejection(
+        creator_id=creator_id,
+        reason="text_too_short",
+    )
+    return jsonify({
+        "error": "text_too_short",
+        "message": str(exc),
+    }), 400
+```
+
+**After:** The same test returned:
+
+```text
+HTTP/1.1 400 BAD REQUEST
+```
+
+Response body:
+
+```json
+{
+  "error": "text_too_short",
+  "message": "Text is too short to score — a few sentences at least."
+}
+```
+
+The audit log also recorded the rejection:
+
+```json
+{
+  "creator_id": "mf02_final_test",
+  "event": "rejected",
+  "reason": "text_too_short",
+  "status": "rejected"
+}
+```
+
+The final regression test was run using:
+
+```bash
+python run_attacks.py --set . --label final
+```
+
+MF02 returned HTTP 400, and the complete 56-case run reported zero automatically marked BROKE cases.
+
+**Interpretation:** This is a verified improvement in input handling and service robustness. It changes an unhandled server error into a controlled client error and records the rejection in the audit log.
+
+It does not demonstrate improved authorship-classification accuracy.
+
+### Classification Improvement Still Outstanding
+
+The October 25 before/after attack and scenario reports showed unchanged results. Although rate limiting, audit logging, and input handling have been implemented and verified, those changes have not been shown to improve detector-classification performance.
+
+A specific classification improvement must still be selected, implemented, and evaluated against the same test samples.
+
+The improvement should be documented with:
+
+- The original behavior.
+- The code change.
+- The reason for making the change.
+- The before-test results.
+- The after-test results.
+- An explanation of whether the change improved, worsened, or did not affect the relevant criterion.
+
+Until this comparison is completed, the project should not claim that its classification-improvement requirement has passed.
+
+## 8. What's Still Broken
+
+The service is functional, but several limitations remain.
+
+1. **Authorship uncertainty:** The model and style signals cannot establish who wrote a piece of text.
+2. **Conservative classification:** In the latest 72-sample evaluation, 66 submissions were classified as unsure and none as AI.
+3. **Ground-truth evaluation:** The 72 samples have not been systematically compared against known authorship labels.
+4. **False-positive evaluation:** Ten known human-written samples still need to be evaluated against the acceptance threshold.
+5. **Score separation:** The five-human versus five-AI mean-score comparison remains incomplete.
+6. **Invalid-input evaluation:** The full ten-case invalid-input acceptance test and subsequent `/ping` check still need to be documented together.
+7. **Classification improvement:** A measurable before/after improvement to detector-classification performance has not yet been demonstrated.
+8. **Rate-limit persistence:** The limiter uses in-memory storage and resets when the service restarts.
+9. **Production readiness:** The development Flask server and local model configuration have not been evaluated as a production deployment.
+10. **Cost measurement:** A measured local compute and energy cost per run has not yet been calculated.
+
+**Next Step**
+
+The next major task is to implement one specific classification improvement and rerun the same evaluation set. The results should be compared with the original run so that any measurable difference can be explained honestly.
+
+## 9. How I Used AI
+
+### Moment 1 — Diagnosing Flask Routes
+
+**What I asked for:** Help testing the Flask routes and diagnosing connection resets.
+
+**What came back:** A sequence of checks for `/health`, `/ping`, and the detector.
+
+**What I changed:** Tested the detector directly and confirmed it returned a score independently of Flask.
+
+### Moment 2 — Implementing Submission Logging
+
+**What I asked for:** Help implementing submission logging.
+
+**What came back:** Guidance for calling `audit.log_decision()` and checking the log.
+
+**What I changed:** Added the logging call to the submission route and verified that real submissions appeared in `/log`.
+
+### Moment 3 — Implementing Scoring and Appeals
+
+**What I asked for:** Help implementing the style signal, score-combination rule, label thresholds, and appeal workflow.
+
+**What came back:** Guidance for combining the model and style scores, returning reader-facing labels, and recording appeals.
+
+**What I changed:** Implemented the style signal and scoring functions, connected them to `/submit`, configured the weights and thresholds, and tested the appeal endpoint against an existing content ID.
+
+### Moment 4 — Unit 8 Rate Limiting and Evaluation
+
+**What I asked for:** Help collecting rate-limit evidence, running the attack set, creating evaluation scenarios, and interpreting the before/after results.
+
+**What came back:** Commands for running the flood test, exporting audit records, running attack and scenario evaluations, and documenting the results.
+
+**What I changed:** Ran the six-case attack set and five scenario evaluations, preserved the reports, and documented the current findings.
+
+The displayed October 25 before/after outputs were unchanged, so a classification improvement that produces a demonstrable difference remains to be completed.
 
 I also evaluated 72 writing submissions and calculated the average model, style, and combined scores. This helped identify the large proportion of uncertain classifications and the difference between the two scoring signals.
 
-Running the Project
+### Moment 5 — Fixing Single-Character Input Handling
 
-See RUNNING.md for installation, setup, and command instructions.
+**What I asked for:** Help diagnosing why the single-character malformed-input test caused an HTTP 500 response.
+
+**What came back:** Guidance to inspect the detector exception and handle the `ValueError` in the Flask submission route.
+
+**What I changed:** Added exception handling, returned HTTP 400 with the `text_too_short` error, recorded the rejection in the audit log, and reran the full 56-case attack set.
+
+This improved input handling and service robustness, although it did not change the detector's classification accuracy.
+
+---
+
+## Running the Project
+
+See `RUNNING.md` for installation, setup, and command instructions.
 
 Activate the virtual environment before running the project.
 
 In Git Bash:
 
-bash
+```bash
 source .venv/Scripts/activate
-
+```
 
 Run the environment check:
 
-bash
+```bash
 python test.py
+```
 
-
-The latest environment check passed all nine checks, including Python version, virtual environment, pinned packages, PyTorch, Flask, detector model, and service availability.
+The environment check passed all nine checks in an earlier run, including Python version, virtual environment, pinned packages, PyTorch, Flask, detector model, and service availability.
 
 Start the service:
 
-bash
+```bash
 python app.py
-
+```
 
 The default address is:
 
-text
+```text
 http://127.0.0.1:5000
-
+```
 
 Run requests from a second terminal while Flask is running.
 
-Final Project Status
+Check service health:
+
+```bash
+curl http://127.0.0.1:5000/health
+```
+
+Run the flood test:
+
+```bash
+python run_attacks.py --flood 15
+```
+
+Run the attack-set preview without sending requests:
+
+```bash
+python run_attacks.py --set . --show
+```
+
+Run the full attack set:
+
+```bash
+python run_attacks.py --set . --label final
+```
+
+---
+
+## Final Project Status
 
 The core service, two scoring signals, weighted scoring implementation, configurable thresholds, audit logging, appeal workflow, and Unit 8 rate limiting have been implemented and tested.
 
 The latest 72-sample evaluation produced:
 
-Average model score: 0.6651
-Average style score: 0.3569
-Average combined score: 0.5110
-Human classifications: 6
-Unsure classifications: 66
-AI classifications: 0
+- Average model score: `0.6651`
+- Average style score: `0.3569`
+- Average combined score: `0.5110`
+- Human classifications: `6`
+- Unsure classifications: `66`
+- AI classifications: `0`
 
-The project still requires a documented evaluation against known human and AI samples, completion of the remaining acceptance tests, and a demonstrable before/after improvement.
+The November 9 dedicated flood test confirmed that the service accepts ten submissions per minute from the same creator and rejects the next five with HTTP 429. All five rejections were verified in the audit log.
+
+The November 9 input-handling fix corrected the MF02 single-character input failure. The request now returns HTTP 400 instead of HTTP 500, and the rejection is recorded in the audit log.
+
+The final November 9 attack run exercised 56 cases:
+
+- 39 HTTP 200 responses.
+- 14 HTTP 400 responses.
+- 1 HTTP 413 response.
+- 2 HTTP 429 responses.
+- 0 automatically marked BROKE.
+- 56 cases left for manual judgment.
+
+The project still requires a documented evaluation against known human and AI samples, completion of the remaining acceptance tests, a measured cost estimate, and a demonstrable before/after improvement to classification performance.
 
 These remaining tasks must be completed before claiming that every project requirement has passed.
 
