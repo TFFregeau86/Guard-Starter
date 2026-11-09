@@ -182,7 +182,19 @@ def submit():
     # Run both independent signals.
     import detector
 
-    model_score = float(detector.model_signal(text))
+    # MF02 FIX: Handle text that is too short for the detector.
+    try:
+        model_score = float(detector.model_signal(text))
+    except ValueError as exc:
+        audit.log_rejection(
+            creator_id=creator_id,
+            reason="text_too_short",
+        )
+        return jsonify({
+            "error": "text_too_short",
+            "message": str(exc),
+        }), 400
+
     style_score = float(stylometry.style_signal(text))
 
     # Validate the signal outputs before combining them.

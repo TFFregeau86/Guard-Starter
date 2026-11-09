@@ -298,12 +298,16 @@ def show_attacks(attacks, url):
         if "raw" in attack:
             print(f"Sent raw, claiming {attack['content_type']}:\n")
             print(attack["raw"] if attack["raw"] else "(an empty body)")
-        elif "text" in attack.get("body", {}):
-            print(attack["body"]["text"])
-            print(f"\n(submits as creator_id `{attack['body']['creator_id']}`)")
         else:
-            print("No text field — the body itself is the attack:\n")
-            print(json.dumps(attack["body"], indent=2))
+            body = attack.get("body")
+
+            if isinstance(body, dict) and "text" in body:
+                print(body["text"])
+                creator_id = body.get("creator_id", "(missing)")
+                print(f"\n(submits as creator_id `{creator_id}`)")
+            else:
+                print("No usable text field — the body itself is the attack:\n")
+                print(json.dumps(body, indent=2))
 
         bash, windows = curl_commands(url, attack)
         if len(bash) > CURL_TOO_LONG:
