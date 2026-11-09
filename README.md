@@ -6,6 +6,8 @@ A local Flask web service that examines submitted writing using authorship-relat
 
 A measurable input-handling improvement was implemented and verified on November 9, 2026. All five operational capstone acceptance criteria are documented as passing. Evaluation against known human- and AI-written samples and a measurable improvement to detector-classification performance remain outstanding. Local CPU and memory measurements have been recorded; direct energy and financial cost measurement remain outstanding.
 
+**Capstone selection:** This project extends the existing Provenance Guard system. It uses **Shape B — Harden Against Failure** and **Path B — Local with Logs**. The extension focuses on input validation, failure handling, rate limiting, audit logging, and recovery rather than rebuilding the classifier.
+
 ---
 
 ## 1. What This Extends
@@ -34,6 +36,30 @@ The service also supports health checks, audit-log retrieval, invalid-request lo
 **Important limitation:** These scores are heuristic indicators of writing patterns, not proof of authorship. Human writing can be incorrectly flagged, and AI-generated writing can receive a human or uncertain classification.
 
 ## 2. The Shape: Signals and Scoring
+
+### Selected Capstone Shape — B: Harden Against Failure
+
+I selected **Shape B — Harden Against Failure**.
+
+The existing Provenance Guard system already accepts writing, calculates authorship-related signals, combines scores, and returns classifications. The capstone extension focuses on what happens when requests are invalid, submitted too frequently, or trigger failures.
+
+The extension includes:
+
+- More controlled handling of malformed input.
+- Rate limiting for repeated submissions.
+- Structured audit records for successful and rejected requests.
+- Tests for invalid input, rate-limit enforcement, normal operation, and recovery.
+- Performance measurements for local execution.
+
+The November 9 MF02 test exposed a single-character input that caused an unhandled `ValueError` and an HTTP 500 response. The submission route was changed to return a controlled HTTP 400 response and record the rejection.
+
+**Out of scope:**
+
+- Replacing the GPT-2 model or rebuilding the authorship detector.
+- Adding a second classification model or another retrieval strategy.
+- Claiming improved classification accuracy without verified human- and AI-authored ground-truth samples.
+
+The scope is limited to hardening the existing service. The classifier's scoring logic and thresholds were not changed as part of the MF02 improvement.
 
 ### Signal One — The Model Signal
 
@@ -141,6 +167,22 @@ The implementation also returns the combined score in the `confidence` field. Th
 The thresholds are configurable and have not been established as optimal through a sufficiently large evaluation dataset. A score in the high-confidence AI range must not be interpreted as definitive proof of AI authorship.
 
 ## 3. Running It and Sample Runs
+
+### Selected Run Path — B: Local with Logs
+
+The application runs locally on the developer's machine using the existing Python environment and local GPT-2 model.
+
+This is the selected deployment path because the project loads a model locally. The assignment explicitly accepts a documented local run with committed records as an alternative to hosted deployment.
+
+The exact startup instructions and environment requirements are documented in `RUNNING.md`.
+
+The service runs at:
+
+```text
+http://127.0.0.1:5000
+```
+
+The run path is intended to be reproducible using the documented setup and startup instructions.
 
 ### A Submission
 
@@ -509,6 +551,8 @@ The extracted dedicated flood evidence is saved in:
 
 This confirms that rejected requests are recorded in the audit log, rather than only being returned as HTTP 429 responses.
 
+**Instrumentation limitation:** The audit records described above capture decisions and rejections, but the documented record format does not establish that every record contains the original submitted input and end-to-end request duration. The assignment's minimum structured-log specification asks for timestamp, input, output, and duration. The current audit evidence therefore demonstrates decision and rejection logging, but should not be described as satisfying all four fields unless those fields are present in the actual committed records.
+
 ## 5. What It Costs
 
 The current implementation uses a local GPT-2 model and in-memory rate-limit storage.
@@ -567,6 +611,26 @@ CPU time is the sum of user and system CPU seconds for the monitored Flask proce
 This was a small, local, sequential test. It is not a production load test. The earlier response-time and CPU/memory experiments are separate runs and should not be directly combined with these measurements.
 
 Electrical energy was not directly measured. CPU time and memory are resource measurements, not watt-hours. A direct energy or financial cost estimate would require reliable power-consumption data and the applicable electricity rate.
+
+### Measured CPU Cost Per Run
+
+The corrected performance test measured 12.672 aggregate CPU seconds across ten successful submissions.
+
+The calculation is:
+
+```text
+12.672 CPU seconds / 10 requests
+= 1.2672 aggregate CPU seconds per request
+```
+
+For 100 submissions per day:
+
+```text
+1.2672 CPU seconds × 100 submissions
+= 126.72 aggregate CPU seconds per day
+```
+
+This is the measured CPU-time basis for the 100-submission calculation. It is not a direct measurement of electricity consumption or financial cost.
 
 ### Estimated Workload for 100 Users per Day
 
@@ -958,6 +1022,18 @@ The November 9 dedicated flood evidence is saved in:
 
 `results/flood_audit_evidence.json`
 
+### Capstone Acceptance Criteria
+
+The five criteria were written in `criteria.md`:
+
+1. **Malformed input safety:** All 10 malformed-request tests must return appropriate 4xx responses without crashing. This protects service availability.
+2. **Rate limiting:** When one creator submits 15 requests within the configured window, at least one must receive HTTP 429. This prevents flooding.
+3. **Audit completeness:** Every tested rejected request must produce an audit record with a timestamp, outcome, and rejection reason. This supports accountability.
+4. **Normal operation:** Valid submissions must return HTTP 200, and `/ping` must return HTTP 200 after malformed-request and flood tests. This checks service availability.
+5. **Failure recovery:** After a malformed submission receives a controlled 4xx response, a subsequent valid submission must still succeed. This checks recovery.
+
+These criteria evaluate the capstone extension: safer input handling, rate limiting, structured audit logging, and service availability.
+
 ### Capstone Acceptance Test Results — November 9, 2026
 
 The five capstone criteria were checked against repeated tests. No application changes were made between the three trials for each repeated test.
@@ -978,6 +1054,37 @@ The five capstone criteria were checked against repeated tests. No application c
 - Audit evidence: `results/audit_extract.json`.
 
 The audit check used the accumulated log rather than three isolated audit-only trials. The repeated recovery checks were sequential: malformed request, health check, then valid submission. These results demonstrate controlled request handling and recovery; they do not establish that the detector correctly identifies every AI-generated or human-written submission.
+
+### Three-Trial Results
+
+The available November 9 evidence establishes the following repeated results:
+
+| Criterion | Target | Trial 1 | Trial 2 | Trial 3 | Verdict |
+|---|---|---|---|---|---|
+| C1 — Malformed input safety | All 10 malformed tests return appropriate 4xx responses without crashing | 12/12 HTTP 400 | 12/12 HTTP 400 | 12/12 HTTP 400 | MET |
+| C2 — Rate limiting | At least one of 15 requests receives HTTP 429 | 5/15 HTTP 429 | 5/15 HTTP 429 | 5/15 HTTP 429 | MET |
+| C3 — Audit completeness | Every tested rejected request has a timestamp, outcome, and rejection reason | Rejections visible in audit extract | Rejections visible in audit extract | Accumulated audit evidence | MET, with limitation |
+| C4 — Normal operation | Valid submission and `/ping` return HTTP 200 after tests | HTTP 200 | HTTP 200 | HTTP 200 | MET |
+| C5 — Failure recovery | A valid request succeeds after a malformed request | HTTP 400 then HTTP 200 | HTTP 400 then HTTP 200 | HTTP 400 then HTTP 200 | MET |
+
+C1 exceeded the ten-case target with 12 malformed cases per trial. C2 exceeded the minimum requirement of one HTTP 429 response with five rate-limit responses in each dedicated flood trial.
+
+C3 was checked using the accumulated audit extract. The evidence demonstrates that rejection events were recorded with timestamps and reasons. The audit completeness test was not performed using three isolated audit extracts, so this is a limitation of the evidence.
+
+### Before-and-After Results
+
+The original October 25 before-and-after attack and scenario reports are:
+
+- Before attack report: `results/attack_run_2026-10-25_1922_before.md`
+- After attack report: `results/attack_run_2026-10-25_1935_after.md`
+- Before scenario report: `results/run_2026-10-25_1928_before.md`
+- After scenario report: `results/run_2026-10-25_1935_after.md`
+
+The displayed attack classifications and HTTP outcomes were unchanged between those October 25 runs.
+
+The November 9 MF02 fix is a separate operational improvement. It has a directly observed before-and-after outcome: the single-character input changed from HTTP 500 to HTTP 400.
+
+The available evidence does not provide a complete set of five criteria tested three times before and three times after the MF02 change. The November 9 three-trial table above is the operational acceptance evidence, not a fabricated replacement for missing before-fix trials.
 
 ## 7. The Improvement
 
@@ -1045,6 +1152,20 @@ MF02 returned HTTP 400, and the complete 56-case run reported zero automatically
 
 It does not demonstrate improved authorship-classification accuracy.
 
+### Before-and-After Improvement Comparison
+
+| Measurement | Before | After |
+|---|---|---|
+| Test case | MF02 single-character input | Same MF02 input |
+| Detector behavior | Unhandled `ValueError` | Exception handled by submission route |
+| HTTP response | 500 Internal Server Error | 400 Bad Request |
+| Audit behavior | No controlled rejection record for the failed path | Rejection recorded as `text_too_short` |
+| Operational outcome | Server error | Controlled client error |
+
+The observed result is a clear improvement for this failure case. It prevents the tested malformed input from producing the same unhandled server error.
+
+The final 56-case run also confirmed that MF02 returned HTTP 400 after the change.
+
 ### Classification Improvement Still Outstanding
 
 The October 25 before/after attack and scenario reports showed unchanged results. Although rate limiting, audit logging, and input handling have been implemented and verified, those changes have not been shown to improve detector-classification performance.
@@ -1076,9 +1197,24 @@ The service is functional, but several limitations remain.
 8. **Production readiness:** The development Flask server and local model configuration have not been evaluated as a production deployment.
 9. **Energy and financial cost:** CPU and memory measurements are recorded, but electrical energy and financial cost per run have not been directly measured.
 
+**Additional capstone limitations:**
+
+- The audit examples show selected fields, but the required minimum structured record of timestamp, input, output, and duration has not been established for every request.
+- The complete five-criterion, three-trial before-and-after test set is not available in the documented evidence.
+- The audit-completeness criterion was checked using the accumulated audit extract rather than three isolated audit-only trial extracts.
+- The corrected CPU and memory test is a small sequential local measurement, not a production load test.
+
+**Why I Stopped**
+
+I stopped the extension at operational hardening rather than changing the classifier without sufficient evidence. The MF02 failure had a clear cause and a measurable fix. A classification change would require verified human- and AI-authored samples so that its effect could be measured honestly.
+
+The project therefore reports the operational improvement that was actually tested rather than claiming an unsupported improvement in classification accuracy.
+
 **Next Step**
 
 The next major task is to implement one specific classification improvement and rerun the same evaluation set. The results should be compared with the original run so that any measurable difference can be explained honestly.
+
+If the project continued for another unit, I would first collect and verify a balanced set of human- and AI-authored samples. That would provide a defensible basis for measuring false positives, false negatives, coverage, and score separation before changing the classifier.
 
 ## 9. How I Used AI
 
