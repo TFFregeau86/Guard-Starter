@@ -4,7 +4,7 @@ A local Flask web service that examines submitted writing using authorship-relat
 
 **Current progress:** The core service, scoring pipeline, audit logging, appeal endpoint, and Unit 8 rate limiting are implemented. The service has been tested with a 72-sample evaluation, a dedicated flood test, and a 56-case attack suite.
 
-A measurable input-handling improvement was implemented and verified on November 9, 2026. However, a separate improvement to detector-classification performance has not yet been demonstrated. Several acceptance criteria also still require systematic evaluation against known ground-truth samples.
+A measurable input-handling improvement was implemented and verified on November 9, 2026. All five operational capstone acceptance criteria are documented as passing. Evaluation against known human- and AI-written samples, a measurable improvement to detector-classification performance, and local compute-cost measurement remain outstanding.
 
 ---
 
@@ -649,67 +649,25 @@ The endpoint records an appeal and its review status. It does not independently 
 - The final attack suite verified the MF02 input-handling fix with an HTTP 400 response.
 - The final attack suite also exercised malformed requests, oversized input, and flood cases.
 
-**Acceptance Criteria Still Requiring Systematic Evaluation**
+### Detector Classification Evaluation Still Outstanding
 
-The following tests must be completed and documented before claiming that all evaluation criteria have passed.
+The operational acceptance criteria are documented as passing in the November 9 capstone tests. The following classification-performance evaluations still require known ground-truth samples.
 
 **1. False Positives on Human Writing**
 
 Submit ten pieces of writing known to be human-written.
 
-The target is for no more than one to receive the high-confidence AI classification.
-
-The actual authorship of every sample must be known.
+The target is for no more than one to receive the high-confidence AI classification. Record the actual authorship and predicted classification for every sample.
 
 **2. Score Separation**
 
 Submit five human-written samples and five AI-generated samples.
 
-Calculate the mean combined score for each group.
+Calculate the mean combined score for each group. The target is for the AI-generated group to have an average at least `0.15` higher than the human-written group.
 
-The target is for the AI-generated group to have an average at least `0.15` higher than the human-written group.
+The existing 72-sample evaluation does not satisfy this requirement because its ground-truth authorship labels have not been systematically established.
 
-The existing 72-sample evaluation does not independently satisfy this requirement because the ground-truth labels have not been systematically established.
-
-**3. All Three Classifications Are Reachable**
-
-Verify that actual submissions receive each classification:
-
-- `human`
-- `unsure`
-- `ai`
-
-The scoring tests demonstrate that all three classification branches are available.
-
-Observed submission and attack results already include all three classifications. For example, the November 9 attack suite included human, unsure, and AI results.
-
-The classification branches are therefore reachable in the current tests, although their accuracy has not been established.
-
-**4. Appeals Are Recorded**
-
-Verify that a valid appeal for an existing content ID returns success, creates an audit entry, and records `under_review`.
-
-Also verify that nonexistent content IDs are rejected.
-
-The successful and nonexistent-ID cases have been tested. The November 9 appeal and its matching original decision are visible in the audit log.
-
-**5. Invalid Input Is Handled Safely**
-
-Run ten invalid-input tests covering:
-
-- Missing text.
-- Empty text.
-- Whitespace-only text.
-- Non-string text.
-- Missing creator IDs.
-- Invalid JSON.
-- Other relevant malformed requests.
-
-Verify that each request returns an appropriate 4xx response without crashing the service.
-
-Then confirm that `POST /ping` still returns HTTP 200.
-
-Several invalid-input cases have passed, and the final attack suite exercised multiple malformed requests. However, the complete ten-case acceptance test and its subsequent `/ping` check have not yet been documented together.
+The separate requirement to demonstrate a measurable before/after improvement to detector-classification performance is documented in Section 7.
 
 ### Unit 8 — Rate Limiting
 

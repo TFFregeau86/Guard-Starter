@@ -265,30 +265,38 @@ The first model use can take longer because the model must be loaded. Later requ
 A warning about loss_type=None may appear from the installed model libraries. A warning alone does not indicate failure; check whether the detector returns a score and whether the request completes successfully.
 
 Current Milestone Status
-Implemented and Tested
-Flask service starts locally.
-/ping, /health, and /log respond.
-/submit validates request data.
-The GPT-2 detector produces a model score.
-stylometry.style_signal(text) produces a style score.
-scoring.combine_signals() combines the signals.
-scoring.score_to_label() assigns classifications and reader-facing messages.
-The configured label ranges and representative boundaries have been tested.
-Successful submissions receive unique content IDs.
-The audit log records decisions with all nine required fields.
-Rejected requests are recorded in the audit log.
-/appeal records valid appeals and marks them under_review.
-Nonexistent content IDs are rejected for appeals.
-The environment check passed all nine checks in the activated virtual environment.
-Remaining Evaluation and Submission Work
-Test ten known human-written samples and record the false-positive count.
-Compare five human-written and five AI-generated samples using their mean combined scores.
-Record a real submission classified as human; actual submissions have already demonstrated unsure and ai.
-Complete and document the ten invalid-input tests.
-Preserve the required evaluation evidence.
-Confirm and complete the Git commits required by the assignment.
 
-These are remaining evaluation and submission tasks, not missing core route implementations.
+Implemented and Tested
+
+- Flask service starts locally.
+- /ping, /health, and /log respond.
+- /submit validates request data.
+- The GPT-2 detector produces a model score.
+- stylometry.style_signal(text) produces a style score.
+- scoring.combine_signals() combines the signals.
+- scoring.score_to_label() assigns classifications and reader-facing messages.
+- The configured label ranges and representative boundaries have been tested.
+- Successful submissions receive unique content IDs.
+- The audit log records decisions with all nine required fields.
+- Rejected requests are recorded in the audit log.
+- /appeal records valid appeals and marks them under_review.
+- Nonexistent content IDs are rejected for appeals.
+- The environment check passed all nine checks in the activated virtual environment.
+- Three malformed-input trials each exercised 56 cases; the 12 known malformed cases returned HTTP 400 in all three trials.
+- Three valid flood trials each accepted ten submissions and rejected the next five with HTTP 429.
+- Three recovery cycles confirmed malformed=400, ping=200, and valid=200.
+- All five operational capstone acceptance criteria are documented as passing in README.md.
+
+Remaining Evaluation Work
+
+- Test ten known human-written samples and record the false-positive count.
+- Compare five human-written and five AI-generated samples using their mean combined scores.
+- Demonstrate a measurable before/after improvement to detector-classification performance.
+- Measure local compute and energy costs.
+
+All three classification labels have appeared in test outputs. Their accuracy against known ground-truth authorship has not been established.
+
+These remaining items concern classification evaluation and cost measurement, not missing core route implementations or unfinished operational acceptance tests.
 
 Troubleshooting
 Symptom	What to check
