@@ -979,6 +979,27 @@ The November 9 dedicated flood evidence is saved in:
 
 `results/flood_audit_evidence.json`
 
+### Capstone Acceptance Test Results — November 9, 2026
+
+The five capstone criteria were checked against repeated tests. No application changes were made between the three trials for each repeated test.
+
+| Criterion | Evidence | Verdict |
+|---|---|---|
+| C1 — Malformed input safety | 12 malformed cases returned HTTP 400 in each of 3 trials (36 responses). | MET |
+| C2 — Rate limiting | Each of 3 valid 15-request flood trials returned 10 HTTP 200 and 5 HTTP 429 responses. | MET |
+| C3 — Audit completeness | The inspected audit extract contained rejected-request records with timestamps and rejection reasons. | MET |
+| C4 — Normal operation | In each of 3 cycles, POST `/ping` and a valid submission returned HTTP 200. | MET |
+| C5 — Failure recovery | In each of 3 cycles, a malformed submission returned HTTP 400 and the following valid submission returned HTTP 200. | MET |
+
+**Test evidence files**
+
+- Malformed-input trials: `results/attack_run_2026-11-09_1646_malformed_trial1.md`, `results/attack_run_2026-11-09_1648_malformed_trial2.md`, and `results/attack_run_2026-11-09_1650_malformed_trial3.md`.
+- Passing flood trials: `results/flood_2026-11-09_1130.md`, `results/flood_2026-11-09_1206.md`, and `results/flood_2026-11-09_1645.md`.
+- Excluded carryover run: `results/flood_2026-11-09_1643.md` (15 requests returned HTTP 429 because the rate-limit window was already active).
+- Audit evidence: `results/audit_extract.json`.
+
+The audit check used the accumulated log rather than three isolated audit-only trials. The repeated recovery checks were sequential: malformed request, health check, then valid submission. These results demonstrate controlled request handling and recovery; they do not establish that the detector correctly identifies every AI-generated or human-written submission.
+
 ## 7. The Improvement
 
 ### Verified Input-Handling Improvement — MF02
@@ -1071,11 +1092,10 @@ The service is functional, but several limitations remain.
 3. **Ground-truth evaluation:** The 72 samples have not been systematically compared against known authorship labels.
 4. **False-positive evaluation:** Ten known human-written samples still need to be evaluated against the acceptance threshold.
 5. **Score separation:** The five-human versus five-AI mean-score comparison remains incomplete.
-6. **Invalid-input evaluation:** The full ten-case invalid-input acceptance test and subsequent `/ping` check still need to be documented together.
-7. **Classification improvement:** A measurable before/after improvement to detector-classification performance has not yet been demonstrated.
-8. **Rate-limit persistence:** The limiter uses in-memory storage and resets when the service restarts.
-9. **Production readiness:** The development Flask server and local model configuration have not been evaluated as a production deployment.
-10. **Cost measurement:** A measured local compute and energy cost per run has not yet been calculated.
+6. **Classification improvement:** A measurable before/after improvement to detector-classification performance has not yet been demonstrated.
+7. **Rate-limit persistence:** The limiter uses in-memory storage and resets when the service restarts.
+8. **Production readiness:** The development Flask server and local model configuration have not been evaluated as a production deployment.
+9. **Cost measurement:** A measured local compute and energy cost per run has not yet been calculated.
 
 **Next Step**
 
@@ -1149,7 +1169,7 @@ Run the environment check:
 python test.py
 ```
 
-The environment check passed all nine checks in an earlier run, including Python version, virtual environment, pinned packages, PyTorch, Flask, detector model, and service availability.
+The environment check passed all nine checks in an earlier run, including Python version, virtual environment, declared dependency ranges, PyTorch, Flask, detector model, and service availability.
 
 Start the service:
 
@@ -1217,8 +1237,8 @@ The final November 9 attack run exercised 56 cases:
 - 0 automatically marked BROKE.
 - 56 cases left for manual judgment.
 
-The project still requires a documented evaluation against known human and AI samples, completion of the remaining acceptance tests, a measured cost estimate, and a demonstrable before/after improvement to classification performance.
+The five capstone operational acceptance criteria are documented as passing in Section 6. Remaining work includes evaluation against known human and AI samples, a demonstrable before/after improvement to classification performance, and measurement of local compute and energy costs.
 
-These remaining tasks must be completed before claiming that every project requirement has passed.
+The operational tests therefore pass, but the classification-performance and cost-measurement requirements remain incomplete.
 
 The system is an experimental writing-pattern classifier, not a reliable authorship verification system. Its results should be interpreted cautiously and should not be used as definitive evidence of who wrote a piece of text.
