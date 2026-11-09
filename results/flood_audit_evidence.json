@@ -1,0 +1,192 @@
+{
+  "count": 20,
+  "entries": [
+    {
+      "creator_id": "unknown",
+      "event": "rejected",
+      "reason": "invalid_creator_id",
+      "status": "rejected",
+      "timestamp": "2026-11-02T04:55:26+00:00"
+    },
+    {
+      "creator_id": "unknown",
+      "event": "rejected",
+      "limit": "10 per 1 minute",
+      "reason": "rate_limited",
+      "status": "rejected",
+      "timestamp": "2026-11-02T04:55:26+00:00"
+    },
+    {
+      "creator_id": "eval_oversized",
+      "event": "rejected",
+      "reason": "text_too_long",
+      "status": "rejected",
+      "timestamp": "2026-11-02T04:55:26+00:00"
+    },
+    {
+      "creator_id": "eval_array_text",
+      "event": "rejected",
+      "reason": "invalid_text",
+      "status": "rejected",
+      "timestamp": "2026-11-02T04:55:26+00:00"
+    },
+    {
+      "creator_id": "unknown",
+      "event": "rejected",
+      "limit": "10 per 1 minute",
+      "reason": "rate_limited",
+      "status": "rejected",
+      "timestamp": "2026-11-02T04:55:26+00:00"
+    },
+    {
+      "combined_score": 0.2821875535340177,
+      "content_id": "d59bad2f-c62c-4eca-8d04-8f5c60b36632",
+      "creator_id": "flood_tester",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.2587,
+      "status": "decided",
+      "style_score": 0.30567510706803547,
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "combined_score": 0.2821875535340177,
+      "content_id": "2b41069c-2121-4c7b-8501-aadc337896c0",
+      "creator_id": "flood_tester",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.2587,
+      "status": "decided",
+      "style_score": 0.30567510706803547,
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "combined_score": 0.2821875535340177,
+      "content_id": "1fc9105a-9391-4c33-b5ad-d07f0f2d6bc2",
+      "creator_id": "flood_tester",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.2587,
+      "status": "decided",
+      "style_score": 0.30567510706803547,
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "combined_score": 0.2821875535340177,
+      "content_id": "7686ba45-0f69-497b-bce8-19fa9b3e51bd",
+      "creator_id": "flood_tester",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.2587,
+      "status": "decided",
+      "style_score": 0.30567510706803547,
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "combined_score": 0.2821875535340177,
+      "content_id": "6ec131e0-a70d-42eb-ad7b-063d2a44782b",
+      "creator_id": "flood_tester",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.2587,
+      "status": "decided",
+      "style_score": 0.30567510706803547,
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "combined_score": 0.2821875535340177,
+      "content_id": "f9055420-18e2-4955-bfea-ad1224296993",
+      "creator_id": "flood_tester",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.2587,
+      "status": "decided",
+      "style_score": 0.30567510706803547,
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "combined_score": 0.2821875535340177,
+      "content_id": "0b3a80cb-5b5e-4699-9f61-c7da1315f8e9",
+      "creator_id": "flood_tester",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.2587,
+      "status": "decided",
+      "style_score": 0.30567510706803547,
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "combined_score": 0.2821875535340177,
+      "content_id": "739e6810-53d8-46ae-a662-5cf1c92606bc",
+      "creator_id": "flood_tester",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.2587,
+      "status": "decided",
+      "style_score": 0.30567510706803547,
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "combined_score": 0.2821875535340177,
+      "content_id": "7cc4ec9f-d877-4c29-9b0e-4c5b5c1c39d2",
+      "creator_id": "flood_tester",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.2587,
+      "status": "decided",
+      "style_score": 0.30567510706803547,
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "combined_score": 0.2821875535340177,
+      "content_id": "574888d2-fc19-4761-9fe5-1a424d0049e3",
+      "creator_id": "flood_tester",
+      "guess": "human",
+      "label": "This text has patterns often associated with human writing. Automated analysis cannot confirm who wrote it.",
+      "model_score": 0.2587,
+      "status": "decided",
+      "style_score": 0.30567510706803547,
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "creator_id": "flood_tester",
+      "event": "rejected",
+      "limit": "10 per 1 minute",
+      "reason": "rate_limited",
+      "status": "rejected",
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "creator_id": "flood_tester",
+      "event": "rejected",
+      "limit": "10 per 1 minute",
+      "reason": "rate_limited",
+      "status": "rejected",
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "creator_id": "flood_tester",
+      "event": "rejected",
+      "limit": "10 per 1 minute",
+      "reason": "rate_limited",
+      "status": "rejected",
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "creator_id": "flood_tester",
+      "event": "rejected",
+      "limit": "10 per 1 minute",
+      "reason": "rate_limited",
+      "status": "rejected",
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    },
+    {
+      "creator_id": "flood_tester",
+      "event": "rejected",
+      "limit": "10 per 1 minute",
+      "reason": "rate_limited",
+      "status": "rejected",
+      "timestamp": "2026-11-09T04:30:59+00:00"
+    }
+  ]
+}
